@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Poemas - Pro</title>
+    <style>
+        :root {
+            --bg-color: #ffffe0;
+            --border-color: #000;
+            --header-blue: #0000ff;
+            --input-bg: #fff;
+            --center-row-bg: #d4f1f9;
+            --save-indicator: #27ae60;
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--bg-color);
+            border: 1px solid #ccc;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header-info {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .header-info label {
+            font-weight: bold;
+            text-align: right;
+            padding-right: 10px;
+            padding-top: 5px;
+        }
+
+        input[type="text"], input[type="date"], input[type="number"], select {
+            border: 1px solid #999;
+            padding: 6px;
+            font-size: 14px;
+            width: 100%;
+            background-color: var(--input-bg);
+        }
+
+        .title-input {
+            font-size: 18px;
+            color: var(--header-blue);
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .user-profile {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background-color: #e8f4fd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .user-profile label { font-weight: bold; white-space: nowrap; }
+        .user-profile select { max-width: 200px; }
+        .user-actions { margin-left: auto; display: flex; gap: 5px; }
+
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 12px;
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .btn-small:hover { background-color: #95a5a6; }
+
+        .save-status {
+            text-align: center;
+            font-size: 12px;
+            color: var(--save-indicator);
+            height: 18px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .char-panel {
+            grid-column: 1 / -1;
+            background-color: #f0f8ff;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #b8d4e8;
+        }
+
+        .char-panel-title { font-weight: bold; margin-bottom: 8px; font-size: 13px; color: #2c3e50; }
+
+        .char-group { display: inline-block; margin-right: 20px; margin-bottom: 8px; }
+        .char-group-label { font-size: 11px; color: #666; margin-bottom: 3px; display: block; }
+
+        .char-btn {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 35px;
+            text-align: center;
+        }
+        .char-btn:hover { background-color: #e3f2fd; border-color: #2196f3; }
+
+        .table-container { overflow-x: auto; margin-bottom: 15px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--bg-color);
+            font-size: 16px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th { background-color: #e8e8a0; font-weight: bold; padding: 8px; }
+
+        .col-no { width: 60px; background-color: #f0f0c0; font-weight: bold; }
+        .col-verso { text-align: left !important; }
+        .col-pal { width: 80px; background-color: #f5f5d0; font-weight: bold; }
+
+        .center-row { background-color: var(--center-row-bg) !important; }
+        .center-row .col-no, .center-row .col-pal { background-color: #b8e6f5 !important; }
+        .center-row input { background-color: var(--center-row-bg); }
+        .center-row input:focus { background-color: #fff; }
+
+        td input {
+            width: 100%;
+            border: none;
+            padding: 8px;
+            font-size: 16px;
+            background-color: transparent;
+            outline: none;
+        }
+        td input:focus { background-color: #fff; box-shadow: inset 0 0 0 2px #4a90d9; }
+        td input.verso-input { text-align: left; }
+        td input.pal-input { text-align: center; background-color: #f5f5d0; font-weight: bold; }
+
+        .add-row {
+            text-align: center;
+            padding: 10px;
+            background-color: #e8e8a0;
+            cursor: pointer;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+        }
+        .add-row:hover { background-color: #d0d090; }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #ccc;
+        }
+
+        button {
+            padding: 10px 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+            transition: background 0.3s;
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+        }
+
+        .btn-pdf { background-color: #e74c3c; }
+        .btn-txt { background-color: #3498db; }
+        .btn-xls { background-color: #27ae60; }
+        .btn-share { background-color: #8e44ad; }
+        .btn-save { background-color: #2ecc71; }
+        .btn-load { background-color: #f39c12; }
+        .btn-new { background-color: #9b59b6; }
+
+        button:hover { opacity: 0.8; }
+
+        .info-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        .info-box strong { color: #856404; }
+
+        @media (max-width: 600px) {
+            .header-info { grid-template-columns: 1fr; font-size: 12px; }
+            .header-info label { text-align: left; }
+            .user-profile { flex-direction: column; align-items: flex-start; }
+            .user-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
+            .char-panel { font-size: 12px; }
+            table { font-size: 14px; }
+            td input { padding: 8px 5px; font-size: 14px; }
+            .col-no { width: 50px; }
+            .col-pal { width: 70px; }
+            button { min-width: 100px; font-size: 12px; padding: 8px 12px; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+<div class="container" id="poem-content">
+    <div class="save-status" id="save-status"></div>
+
+    <div class="info-box">
+        <strong> Consejo:</strong> 
+        Copia y pega directamente en cualquier celda. Cada línea se irá a su fila.
+        Usa <strong>Google Drive</strong> para guardar tus archivos .poema.
+    </div>
+
+    <div class="header-info">
+        <div class="user-profile">
+            <label for="user-select"> Perfil:</label>
+            <select id="user-select" onchange="cambiarPerfil()">
+                <option value="usuario1">Mi Perfil</option>
+                <option value="usuario2">Perfil 2</option>
+                <option value="usuario3">Perfil 3</option>
+            </select>
+            <div class="user-actions">
+                <button class="btn-small" onclick="nuevoPerfil()">+ Nuevo</button>
+                <button class="btn-small" onclick="eliminarPerfil()">🗑️</button>
+            </div>
+        </div>
+
+        <label>Título</label>
+        <input type="text" id="titulo" placeholder="EL VIAJE" class="title-input">
+        
+        <label>Subtítulo</label>
+        <input type="text" id="subtitulo" placeholder="">
+        
+        <label>Autor</label>
+        <input type="text" id="autor" placeholder="Se completa automáticamente">
+        
+        <label>Fecha</label>
+        <input type="date" id="fecha">
+        
+        <label>#</label>
+        <input type="number" id="num-poema" value="5" min="1">
+
+        <div class="char-panel">
+            <div class="char-panel-title"> Caracteres especiales (clic para insertar):</div>
+            
+            <div class="char-group">
+                <span class="char-group-label">Comillas:</span>
+                <span class="char-btn" onclick="insertarCaracter('«')">«</span>
+                <span class="char-btn" onclick="insertarCaracter('»')">»</span>
+                <span class="char-btn" onclick="insertarCaracter('"')">"</span>
+                <span class="char-btn" onclick="insertarCaracter("'")">'</span>
+            </div>
+            
+            <div class="char-group">
+                <span class="char-group-label">Guiones:</span>
+                <span class="char-btn" onclick="insertarCaracter('—')">—</span>
+                <span class="char-btn" onclick="insertarCaracter('–')">–</span>
+            </div>
+            
+            <div class="char-group">
+                <span class="char-group-label">Puntos suspensivos:</span>
+                <span class="char-btn" onclick="insertarCaracter('…')">…</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="tabla-poema">
+            <thead>
+                <tr>
+                    <th class="col-no">N.°</th>
+                    <th class="col-verso">Verso</th>
+                    <th class="col-pal">Palabras</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="actions">
+    <!-- Botón renombrado y con protección -->
+    <button class="btn-new" onclick="nuevoPoemaSeguro()">✨ Nuevo poema</button>
+    
+    <button class="btn-save" onclick="guardarProyecto()">💾 Guardar</button>
+    <button class="btn-load" onclick="cargarProyecto()">📂 Cargar</button>
+    <input type="file" id="file-input" class="hidden" accept=".poema,.json" onchange="procesarArchivoCargado(event)">
+    
+    <button class="btn-pdf" onclick="exportarPDF()">📄 PDF</button>
+    <button class="btn-txt" onclick="exportarTXT()"> TXT</button>
+    <button class="btn-xls" onclick="exportarXLS()"> Excel</button>
+    <button class="btn-share" onclick="compartir()">📤 Compartir</button>
+</div>
+
+<script>
+    const fechaInput = document.getElementById('fecha');
+    const numInput = document.getElementById('num-poema');
+    const tablaBody = document.getElementById('tabla-body');
+    const saveStatus = document.getElementById('save-status');
+    const userSelect = document.getElementById('user-select');
+    const fileInput = document.getElementById('file-input');
+    const autorInput = document.getElementById('autor');
+    
+    let filaCounter = 0;
+    let currentProfile = 'usuario1';
+    let autoSaveTimer = null;
+    let perfilesData = {};
+
+    window.addEventListener('DOMContentLoaded', () => {
+        fechaInput.valueAsDate = new Date();
+        cargarPerfilesGuardados();
+        cargarPoemaActual();
+        inicializarTablas();
+        configurarAutoGuardado();
+    });
+
+    numInput.addEventListener('change', function() {
+        let val = parseInt(this.value);
+        if (!isNaN(val)) this.value = String(val).padStart(3, '0');
+        guardarEnLocalStorage();
+    });
+
+    function cargarPerfilesGuardados() {
+        const guardado = localStorage.getItem('poema_perfiles_data');
+        if (guardado) {
+            perfilesData = JSON.parse(guardado);
+        } else {
+            perfilesData = { 'usuario1': 'Mi Perfil', 'usuario2': 'Perfil 2', 'usuario3': 'Perfil 3' };
+        }
+        
+        userSelect.innerHTML = '';
+        Object.keys(perfilesData).forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = perfilesData[key];
+            userSelect.appendChild(opt);
+        });
+        
+        currentProfile = localStorage.getItem('poema_profile_actual') || 'usuario1';
+        if (!userSelect.querySelector(`option[value="${currentProfile}"]`)) currentProfile = 'usuario1';
+        userSelect.value = currentProfile;
+        
+        autorInput.value = perfilesData[currentProfile] || '';
+    }
+
+    function cambiarPerfil() {
+        currentProfile = userSelect.value;
+        localStorage.setItem('poema_profile_actual', currentProfile);
+        autorInput.value = perfilesData[currentProfile] || '';
+        cargarPoemaActual();
+        mostrarMensaje(` Cambiado a: ${perfilesData[currentProfile]}`);
+    }
+
+    function nuevoPerfil() {
+        const nombre = prompt('Nombre completo del nuevo perfil:');
+        if (nombre && nombre.trim()) {
+            const nombreNormalizado = nombre.trim().toLowerCase().replace(/\s+/g, '_');
+            if (!perfilesData[nombreNormalizado]) {
+                perfilesData[nombreNormalizado] = nombre.trim();
+                localStorage.setItem('poema_perfiles_data', JSON.stringify(perfilesData));
+                cargarPerfilesGuardados();
+                userSelect.value = nombreNormalizado;
+                cambiarPerfil();
+            }
+        }
+    }
+
+    function eliminarPerfil() {
+        if (currentProfile === 'usuario1') {
+            alert('No se puede eliminar el perfil principal');
+            return;
+        }
+        if (confirm(`¿Eliminar perfil "${perfilesData[currentProfile]}"?`)) {
+            localStorage.removeItem(`poema_${currentProfile}`);
+            delete perfilesData[currentProfile];
+            localStorage.setItem('poema_perfiles_data', JSON.stringify(perfilesData));
+            currentProfile = 'usuario1';
+            localStorage.setItem('poema_profile_actual', currentProfile);
+            cargarPerfilesGuardados();
+            cargarPoemaActual();
+        }
+    }
+
+    function configurarAutoGuardado() {
+        document.addEventListener('input', (e) => {
+            if (e.target.tagName === 'INPUT') {
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(guardarEnLocalStorage, 2000);
+                mostrarMensaje('✏️ Editando...');
+            }
+        });
+    }
+
+    function guardarEnLocalStorage() {
+        const datos = obtenerDatosCompletos();
+        localStorage.setItem(`poema_${currentProfile}`, JSON.stringify(datos));
+        mostrarMensaje('✅ Guardado automáticamente en este navegador');
+    }
+
+    function cargarPoemaActual() {
+        const guardado = localStorage.getItem(`poema_${currentProfile}`);
+        if (guardado) {
+            const datos = JSON.parse(guardado);
+            restaurarDatos(datos);
+            mostrarMensaje('📥 Poema cargado');
+        }
+    }
+
+    function mostrarMensaje(texto) {
+        saveStatus.textContent = texto;
+        setTimeout(() => { if (saveStatus.textContent === texto) saveStatus.textContent = ''; }, 3000);
+    }
+
+    function insertarCaracter(caracter) {
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.tagName === 'INPUT') {
+            const start = activeElement.selectionStart;
+            const end = activeElement.selectionEnd;
+            const value = activeElement.value;
+            activeElement.value = value.substring(0, start) + caracter + value.substring(end);
+            activeElement.selectionStart = activeElement.selectionEnd = start + caracter.length;
+            activeElement.focus();
+            guardarEnLocalStorage();
+        }
+    }
+
+    function crearFila(numero) {
+        const fila = document.createElement('tr');
+        fila.dataset.filaId = ++filaCounter;
+        
+        if (numero === 10) {
+            fila.classList.add('center-row');
+        }
+        
+        const tdNo = document.createElement('td');
+        tdNo.className = 'col-no';
+        tdNo.textContent = numero;
+        fila.appendChild(tdNo);
+        
+        const tdVerso = document.createElement('td');
+        tdVerso.className = 'col-verso';
+        const inputVerso = document.createElement('input');
+        inputVerso.type = 'text';
+        inputVerso.className = 'verso-input';
+        inputVerso.placeholder = 'Escribe o pega aquí...';
+        
+        inputVerso.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const textoPegado = (e.clipboardData || window.clipboardData).getData('text');
+            const lineas = textoPegado.split(/\r?\n/);
+            
+            if (lineas.length > 1) {
+                inputVerso.value = lineas[0].trim();
+                actualizarContador(inputVerso);
+                
+                let filaActual = fila;
+                for (let i = 1; i < lineas.length; i++) {
+                    let siguienteFila = filaActual.nextElementSibling;
+                    if (!siguienteFila && tablaBody.children.length < 19) {
+                        agregarFila();
+                        siguienteFila = filaActual.nextElementSibling;
+                    } else if (siguienteFila) {
+                        // Ya existe
+                    }
+                    
+                    if (siguienteFila) {
+                        const inputSiguiente = siguienteFila.querySelector('.verso-input');
+                        inputSiguiente.value = lineas[i].trim();
+                        actualizarContador(inputSiguiente);
+                        filaActual = siguienteFila;
+                    }
+                }
+                
+                const ultimaFila = filaActual;
+                const ultimoInput = ultimaFila.querySelector('.verso-input');
+                if (ultimoInput) {
+                    ultimoInput.focus();
+                    ultimoInput.selectionStart = ultimoInput.selectionEnd = ultimoInput.value.length;
+                }
+                guardarEnLocalStorage();
+            } else {
+                const texto = lineas[0];
+                document.execCommand('insertText', false, texto);
+                guardarEnLocalStorage();
+            }
+        });
+        
+        inputVerso.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const currentRow = this.closest('tr');
+                const nextRow = currentRow.nextElementSibling;
+                
+                if (nextRow && nextRow.querySelector('.verso-input')) {
+                    nextRow.querySelector('.verso-input').focus();
+                }
+            }
+        });
+
+        inputVerso.addEventListener('input', () => {
+            actualizarContador(inputVerso);
+            guardarEnLocalStorage();
+        });
+        
+        tdVerso.appendChild(inputVerso);
+        fila.appendChild(tdVerso);
+        
+        const tdPal = document.createElement('td');
+        tdPal.className = 'col-pal';
+        const inputPal = document.createElement('input');
+        inputPal.type = 'text';
+        inputPal.className = 'pal-input';
+        inputPal.readOnly = true;
+        inputPal.value = '0';
+        tdPal.appendChild(inputPal);
+        fila.appendChild(tdPal);
+        
+        return fila;
+    }
+
+    function actualizarContador(inputVerso) {
+        const texto = inputVerso.value.trim();
+        const palabras = texto === '' ? 0 : texto.split(/\s+/).filter(p => p.length > 0).length;
+        const fila = inputVerso.closest('tr');
+        const inputPal = fila.querySelector('.pal-input');
+        inputPal.value = palabras;
+    }
+
+    function agregarFila() {
+        const numeroFila = tablaBody.children.length + 1;
+        if (numeroFila > 19) return; // Límite estricto
+        const nuevaFila = crearFila(numeroFila);
+        tablaBody.appendChild(nuevaFila);
+        guardarEnLocalStorage();
+    }
+
+    function inicializarTablas() {
+        for (let i = 1; i <= 19; i++) agregarFila(); // Exactamente 19
+    }
+
+    function obtenerDatosCompletos() {
+        return {
+            perfil: currentProfile,
+            metadata: {
+                titulo: document.getElementById('titulo').value,
+                subtitulo: document.getElementById('subtitulo').value,
+                autor: autorInput.value,
+                fecha: document.getElementById('fecha').value,
+                numero: document.getElementById('num-poema').value
+            },
+            versos: Array.from(tablaBody.querySelectorAll('tr')).map((fila, idx) => {
+                const input = fila.querySelector('.verso-input');
+                return {
+                    numero: idx + 1,
+                    texto: input.value,
+                    palabras: input.value.trim() ? input.value.trim().split(/\s+/).filter(p => p.length > 0).length : 0
+                };
+            })
+        };
+    }
+
+    function restaurarDatos(datos) {
+        if (datos.metadata) {
+            document.getElementById('titulo').value = datos.metadata.titulo || '';
+            document.getElementById('subtitulo').value = datos.metadata.subtitulo || '';
+            autorInput.value = datos.metadata.autor || perfilesData[currentProfile] || '';
+            document.getElementById('fecha').value = datos.metadata.fecha || '';
+            document.getElementById('num-poema').value = datos.metadata.numero || '1';
+        }
+        
+        tablaBody.innerHTML = '';
+        filaCounter = 0;
+        if (datos.versos && datos.versos.length > 0) {
+            datos.versos.forEach(v => {
+                const fila = crearFila(v.numero);
+                const input = fila.querySelector('.verso-input');
+                input.value = v.texto || '';
+                actualizarContador(input);
+                tablaBody.appendChild(fila);
+            });
+            // Rellenar hasta 19 si hay menos
+            if (datos.versos.length < 19) {
+                for(let i = datos.versos.length + 1; i <= 19; i++) agregarFila();
+            }
+        } else {
+            inicializarTablas();
+        }
+    }
+
+    // Función segura para nuevo poema
+    function nuevoPoemaSeguro() {
+        // Verificar si hay texto escrito para advertir
+        const hayTexto = Array.from(tablaBody.querySelectorAll('.verso-input')).some(i => i.value.trim() !== '');
+        const hayTitulo = document.getElementById('titulo').value.trim() !== '';
+
+        if (hayTexto || hayTitulo) {
+            if (confirm("⚠️ ¡Atención! Tienes un poema en pantalla que no has guardado como archivo.\n\nSi creas uno nuevo, perderás este si no le diste a 'Guardar'.\n\n¿Estás seguro de que quieres limpiar la pantalla para un nuevo poema?")) {
+                crearNuevoPoema();
+            }
+        } else {
+            crearNuevoPoema();
+        }
+    }
+
+    function crearNuevoPoema() {
+        document.getElementById('titulo').value = '';
+        document.getElementById('subtitulo').value = '';
+        autorInput.value = perfilesData[currentProfile] || '';
+        fechaInput.valueAsDate = new Date();
+        document.getElementById('num-poema').value = '1';
+        tablaBody.innerHTML = '';
+        filaCounter = 0;
+        inicializarTablas();
+        guardarEnLocalStorage();
+        mostrarMensaje('✨ Nuevo poema creado');
+    }
+
+    function guardarProyecto() {
+        const datos = obtenerDatosCompletos();
+        const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+        const enlace = document.createElement('a');
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = `poema_${datos.metadata.numero}_${currentProfile}.poema`;
+        enlace.click();
+        mostrarMensaje('💾 Proyecto exportado a archivo');
+    }
+
+    function cargarProyecto() { fileInput.click(); }
+
+    function procesarArchivoCargado(event) {
+        const archivo = event.target.files[0];
+        if (!archivo) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const datos = JSON.parse(e.target.result);
+                if (datos.perfil) {
+                    currentProfile = datos.perfil;
+                    localStorage.setItem('poema_profile_actual', currentProfile);
+                    if (userSelect.querySelector(`option[value="${currentProfile}"]`)) {
+                        userSelect.value = currentProfile;
+                    }
+                }
+                restaurarDatos(datos);
+                guardarEnLocalStorage();
+                mostrarMensaje('📂 Proyecto cargado');
+            } catch (err) {
+                alert('Error al leer el archivo: ' + err.message);
+            }
+        };
+        reader.readAsText(archivo);
+        event.target.value = '';
+    }
+
+    function obtenerDatos() { return obtenerDatosCompletos().metadata; }
+    function obtenerVersos() { return obtenerDatosCompletos().versos.filter(v => v.texto.trim() !== ''); }
+
+    function exportarPDF() {
+        const elemento = document.getElementById('poem-content');
+        const datos = obtenerDatos();
+        html2pdf().set({
+            margin: 10, filename: `poema_${datos.numero}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(elemento).save();
+    }
+
+    function exportarTXT() {
+        const datos = obtenerDatos();
+        const versos = obtenerVersos();
+        let contenido = `Título: ${datos.titulo}\nAutor: ${datos.autor}\nFecha: ${datos.fecha} #${datos.numero}\n\n`;
+        versos.forEach(v => contenido += `${v.texto}\n`);
+        
+        const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+        const enlace = document.createElement('a');
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = `poema_${datos.numero}.txt`;
+        enlace.click();
+    }
+
+    function exportarXLS() {
+        const wb = XLSX.utils.book_new();
+        const datos = obtenerDatos();
+        const versos = obtenerVersos();
+        const ws_data = [
+            ["Título", datos.titulo], ["Autor", datos.autor], ["Fecha", datos.fecha], ["#", datos.numero],
+            [], ["N.°", "Verso", "Palabras"]
+        ];
+        versos.forEach(v => ws_data.push([v.numero, v.texto, v.palabras]));
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        ws['!cols'] = [{wch: 5}, {wch: 40}, {wch: 10}];
+        XLSX.utils.book_append_sheet(wb, ws, "Poema");
+        XLSX.writeFile(wb, `poema_${datos.numero}.xls`);
+    }
+
+    function compartir() {
+        const datos = obtenerDatos();
+        const versos = obtenerVersos();
+        let texto = ` ${datos.titulo}\n✍️ ${datos.autor}\n📅 ${datos.fecha} #${datos.numero}\n\n`;
+        versos.forEach(v => texto += `${v.texto}\n`);
+        
+        if (navigator.share) {
+            navigator.share({ title: datos.titulo, text: texto }).catch(err => console.log('Error:', err));
+        } else {
+            navigator.clipboard.writeText(texto).then(() => alert('Texto copiado.'));
+        }
+    }
+</script>
+
+</body>
+</html>
