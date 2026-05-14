@@ -236,10 +236,6 @@
             button { min-width: 100px; font-size: 12px; padding: 8px 12px; }
         }
     </style>
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
@@ -649,12 +645,14 @@
     function exportarPDF() {
         const elemento = document.getElementById('poem-content');
         const datos = obtenerDatos();
-        html2pdf().set({
-            margin: 10, filename: `poema_${datos.numero}.pdf`,
+        const opciones = {
+            margin: 10,
+            filename: `poema_${datos.numero}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        }).from(elemento).save();
+        };
+        html2pdf().set(opciones).from(elemento).save();
     }
 
     function exportarTXT() {
