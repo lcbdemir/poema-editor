@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Poemas - Pro</title>
+    <title>Editor de Poemas - Sync en Tiempo Real</title>
     <style>
         :root {
             --bg-color: #ffffe0;
@@ -12,6 +12,7 @@
             --input-bg: #fff;
             --center-row-bg: #d4f1f9;
             --save-indicator: #27ae60;
+            --sync-indicator: #9b59b6;
         }
         
         * { box-sizing: border-box; }
@@ -90,13 +91,30 @@
 
         .btn-small:hover { background-color: #95a5a6; }
 
-        .save-status {
+        .sync-status {
             text-align: center;
             font-size: 12px;
-            color: var(--save-indicator);
+            color: var(--sync-indicator);
             height: 18px;
             margin-bottom: 5px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--sync-indicator);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .char-panel {
@@ -108,7 +126,6 @@
         }
 
         .char-panel-title { font-weight: bold; margin-bottom: 8px; font-size: 13px; color: #2c3e50; }
-
         .char-group { display: inline-block; margin-right: 20px; margin-bottom: 8px; }
         .char-group-label { font-size: 11px; color: #666; margin-bottom: 3px; display: block; }
 
@@ -143,7 +160,6 @@
         }
 
         th { background-color: #e8e8a0; font-weight: bold; padding: 8px; }
-
         .col-no { width: 60px; background-color: #f0f0c0; font-weight: bold; }
         .col-verso { text-align: left !important; }
         .col-pal { width: 80px; background-color: #f5f5d0; font-weight: bold; }
@@ -164,16 +180,6 @@
         td input:focus { background-color: #fff; box-shadow: inset 0 0 0 2px #4a90d9; }
         td input.verso-input { text-align: left; }
         td input.pal-input { text-align: center; background-color: #f5f5d0; font-weight: bold; }
-
-        .add-row {
-            text-align: center;
-            padding: 10px;
-            background-color: #e8e8a0;
-            cursor: pointer;
-            font-weight: bold;
-            border: 1px solid var(--border-color);
-        }
-        .add-row:hover { background-color: #d0d090; }
 
         .actions {
             display: flex;
@@ -203,21 +209,19 @@
         .btn-txt { background-color: #3498db; }
         .btn-xls { background-color: #27ae60; }
         .btn-share { background-color: #8e44ad; }
-        .btn-save { background-color: #2ecc71; }
-        .btn-load { background-color: #f39c12; }
         .btn-new { background-color: #9b59b6; }
 
         button:hover { opacity: 0.8; }
 
         .info-box {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 15px;
             font-size: 13px;
         }
-        .info-box strong { color: #856404; }
+        .info-box strong { color: #155724; }
 
         @media (max-width: 600px) {
             .header-info { grid-template-columns: 1fr; font-size: 12px; }
@@ -232,19 +236,23 @@
             button { min-width: 100px; font-size: 12px; padding: 8px 12px; }
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
 
 <div class="container" id="poem-content">
-    <div class="save-status" id="save-status"></div>
+    <div class="sync-status" id="sync-status">
+        <div class="sync-dot"></div>
+        <span id="sync-text">Conectando...</span>
+    </div>
 
     <div class="info-box">
-        <strong> Consejo:</strong> 
-        Copia y pega directamente en cualquier celda. Cada línea se irá a su fila.
-        Usa <strong>Google Drive</strong> para guardar tus archivos .poema.
+        <strong>✅ Sincronización automática activada</strong><br>
+        Lo que escribas aquí se guardará automáticamente y se verá en todos tus dispositivos al instante.
     </div>
 
     <div class="header-info">
@@ -257,7 +265,6 @@
             </select>
             <div class="user-actions">
                 <button class="btn-small" onclick="nuevoPerfil()">+ Nuevo</button>
-                <button class="btn-small" onclick="eliminarPerfil()">🗑️</button>
             </div>
         </div>
 
@@ -315,13 +322,7 @@
 </div>
 
 <div class="actions">
-    <!-- Botón renombrado y con protección -->
-    <button class="btn-new" onclick="nuevoPoemaSeguro()">✨ Nuevo poema</button>
-    
-    <button class="btn-save" onclick="guardarProyecto()">💾 Guardar</button>
-    <button class="btn-load" onclick="cargarProyecto()">📂 Cargar</button>
-    <input type="file" id="file-input" class="hidden" accept=".poema,.json" onchange="procesarArchivoCargado(event)">
-    
+    <button class="btn-new" onclick="nuevoPoema()">✨ Nuevo poema</button>
     <button class="btn-pdf" onclick="exportarPDF()">📄 PDF</button>
     <button class="btn-txt" onclick="exportarTXT()"> TXT</button>
     <button class="btn-xls" onclick="exportarXLS()"> Excel</button>
@@ -329,39 +330,94 @@
 </div>
 
 <script>
+    // ============================================
+    // 🔥 TU CONFIGURACIÓN DE FIREBASE
+    // ============================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyDoJ-GfkACyZrM322oCW5kH_Bu1TrUH5Y4",
+        authDomain: "poema100-sync.firebaseapp.com",
+        projectId: "poema100-sync",
+        storageBucket: "poema100-sync.firebasestorage.app",
+        messagingSenderId: "880127934344",
+        appId: "1:880127934344:web:2042fa37e9bb904474843d"
+    };
+    // ============================================
+    
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
     const fechaInput = document.getElementById('fecha');
     const numInput = document.getElementById('num-poema');
     const tablaBody = document.getElementById('tabla-body');
-    const saveStatus = document.getElementById('save-status');
+    const syncStatus = document.getElementById('sync-text');
     const userSelect = document.getElementById('user-select');
-    const fileInput = document.getElementById('file-input');
     const autorInput = document.getElementById('autor');
     
     let filaCounter = 0;
     let currentProfile = 'usuario1';
-    let autoSaveTimer = null;
-    let perfilesData = {};
+    let debounceTimer = null;
+    let perfilesData = { 'usuario1': 'Mi Perfil', 'usuario2': 'Perfil 2', 'usuario3': 'Perfil 3' };
+    let isFirstLoad = true;
 
-    window.addEventListener('DOMContentLoaded', () => {
+    // Inicialización
+    window.addEventListener('DOMContentLoaded', async () => {
         fechaInput.valueAsDate = new Date();
-        cargarPerfilesGuardados();
-        cargarPoemaActual();
+        await cargarPerfiles();
+        await inicializarPoema();
         inicializarTablas();
-        configurarAutoGuardado();
+        configurarSincronizacion();
     });
+
+    // Sincronización en tiempo real
+    function configurarSincronizacion() {
+        db.collection('poemas').doc(getPoemaId()).onSnapshot((doc) => {
+            if (doc.exists && !isFirstLoad) {
+                const datos = doc.data();
+                restaurarDatos(datos, false);
+                mostrarSync('Sincronizado ✓');
+            }
+            isFirstLoad = false;
+        }, (error) => {
+            console.error("Error de sincronización:", error);
+            mostrarSync('Error de conexión');
+        });
+    }
+
+    function getPoemaId() {
+        return `poema_${currentProfile}_${numInput.value || '1'}`;
+    }
+
+    async function guardarEnFirebase() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async () => {
+            try {
+                mostrarSync('Guardando...');
+                const datos = obtenerDatosCompletos();
+                await db.collection('poemas').doc(getPoemaId()).set(datos, { merge: true });
+                mostrarSync('Sincronizado ✓');
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                mostrarSync('Error al guardar');
+            }
+        }, 1000);
+    }
+
+    function mostrarSync(texto) {
+        syncStatus.textContent = texto;
+    }
 
     numInput.addEventListener('change', function() {
         let val = parseInt(this.value);
         if (!isNaN(val)) this.value = String(val).padStart(3, '0');
-        guardarEnLocalStorage();
+        isFirstLoad = true;
+        inicializarPoema();
     });
 
-    function cargarPerfilesGuardados() {
-        const guardado = localStorage.getItem('poema_perfiles_data');
-        if (guardado) {
-            perfilesData = JSON.parse(guardado);
-        } else {
-            perfilesData = { 'usuario1': 'Mi Perfil', 'usuario2': 'Perfil 2', 'usuario3': 'Perfil 3' };
+    async function cargarPerfiles() {
+        const doc = await db.collection('perfiles').doc('lista').get();
+        if (doc.exists) {
+            perfilesData = doc.data();
         }
         
         userSelect.innerHTML = '';
@@ -373,90 +429,45 @@
         });
         
         currentProfile = localStorage.getItem('poema_profile_actual') || 'usuario1';
-        if (!userSelect.querySelector(`option[value="${currentProfile}"]`)) currentProfile = 'usuario1';
-        userSelect.value = currentProfile;
+        if (userSelect.querySelector(`option[value="${currentProfile}"]`)) {
+            userSelect.value = currentProfile;
+        }
         
         autorInput.value = perfilesData[currentProfile] || '';
     }
 
-    function cambiarPerfil() {
+    async function cambiarPerfil() {
         currentProfile = userSelect.value;
         localStorage.setItem('poema_profile_actual', currentProfile);
         autorInput.value = perfilesData[currentProfile] || '';
-        cargarPoemaActual();
-        mostrarMensaje(` Cambiado a: ${perfilesData[currentProfile]}`);
+        isFirstLoad = true;
+        await inicializarPoema();
+        mostrarSync(`Perfil: ${perfilesData[currentProfile]}`);
     }
 
-    function nuevoPerfil() {
+    async function nuevoPerfil() {
         const nombre = prompt('Nombre completo del nuevo perfil:');
         if (nombre && nombre.trim()) {
             const nombreNormalizado = nombre.trim().toLowerCase().replace(/\s+/g, '_');
             if (!perfilesData[nombreNormalizado]) {
                 perfilesData[nombreNormalizado] = nombre.trim();
-                localStorage.setItem('poema_perfiles_data', JSON.stringify(perfilesData));
-                cargarPerfilesGuardados();
+                await db.collection('perfiles').doc('lista').set(perfilesData);
+                await cargarPerfiles();
                 userSelect.value = nombreNormalizado;
                 cambiarPerfil();
             }
         }
     }
 
-    function eliminarPerfil() {
-        if (currentProfile === 'usuario1') {
-            alert('No se puede eliminar el perfil principal');
-            return;
-        }
-        if (confirm(`¿Eliminar perfil "${perfilesData[currentProfile]}"?`)) {
-            localStorage.removeItem(`poema_${currentProfile}`);
-            delete perfilesData[currentProfile];
-            localStorage.setItem('poema_perfiles_data', JSON.stringify(perfilesData));
-            currentProfile = 'usuario1';
-            localStorage.setItem('poema_profile_actual', currentProfile);
-            cargarPerfilesGuardados();
-            cargarPoemaActual();
-        }
-    }
-
-    function configurarAutoGuardado() {
-        document.addEventListener('input', (e) => {
-            if (e.target.tagName === 'INPUT') {
-                clearTimeout(autoSaveTimer);
-                autoSaveTimer = setTimeout(guardarEnLocalStorage, 2000);
-                mostrarMensaje('✏️ Editando...');
-            }
-        });
-    }
-
-    function guardarEnLocalStorage() {
-        const datos = obtenerDatosCompletos();
-        localStorage.setItem(`poema_${currentProfile}`, JSON.stringify(datos));
-        mostrarMensaje('✅ Guardado automáticamente en este navegador');
-    }
-
-    function cargarPoemaActual() {
-        const guardado = localStorage.getItem(`poema_${currentProfile}`);
-        if (guardado) {
-            const datos = JSON.parse(guardado);
-            restaurarDatos(datos);
-            mostrarMensaje('📥 Poema cargado');
-        }
-    }
-
-    function mostrarMensaje(texto) {
-        saveStatus.textContent = texto;
-        setTimeout(() => { if (saveStatus.textContent === texto) saveStatus.textContent = ''; }, 3000);
-    }
-
-    function insertarCaracter(caracter) {
-        const activeElement = document.activeElement;
-        if (activeElement && activeElement.tagName === 'INPUT') {
-            const start = activeElement.selectionStart;
-            const end = activeElement.selectionEnd;
-            const value = activeElement.value;
-            activeElement.value = value.substring(0, start) + caracter + value.substring(end);
-            activeElement.selectionStart = activeElement.selectionEnd = start + caracter.length;
-            activeElement.focus();
-            guardarEnLocalStorage();
+    async function inicializarPoema() {
+        mostrarSync('Cargando...');
+        const doc = await db.collection('poemas').doc(getPoemaId()).get();
+        
+        if (doc.exists) {
+            restaurarDatos(doc.data(), true);
+        } else {
+            const datosVacios = obtenerDatosCompletos();
+            await db.collection('poemas').doc(getPoemaId()).set(datosVacios);
         }
     }
 
@@ -495,8 +506,6 @@
                     if (!siguienteFila && tablaBody.children.length < 19) {
                         agregarFila();
                         siguienteFila = filaActual.nextElementSibling;
-                    } else if (siguienteFila) {
-                        // Ya existe
                     }
                     
                     if (siguienteFila) {
@@ -507,17 +516,15 @@
                     }
                 }
                 
-                const ultimaFila = filaActual;
-                const ultimoInput = ultimaFila.querySelector('.verso-input');
+                const ultimoInput = filaActual.querySelector('.verso-input');
                 if (ultimoInput) {
                     ultimoInput.focus();
                     ultimoInput.selectionStart = ultimoInput.selectionEnd = ultimoInput.value.length;
                 }
-                guardarEnLocalStorage();
+                guardarEnFirebase();
             } else {
-                const texto = lineas[0];
-                document.execCommand('insertText', false, texto);
-                guardarEnLocalStorage();
+                document.execCommand('insertText', false, lineas[0]);
+                guardarEnFirebase();
             }
         });
         
@@ -535,7 +542,7 @@
 
         inputVerso.addEventListener('input', () => {
             actualizarContador(inputVerso);
-            guardarEnLocalStorage();
+            guardarEnFirebase();
         });
         
         tdVerso.appendChild(inputVerso);
@@ -564,14 +571,13 @@
 
     function agregarFila() {
         const numeroFila = tablaBody.children.length + 1;
-        if (numeroFila > 19) return; // Límite estricto
+        if (numeroFila > 19) return;
         const nuevaFila = crearFila(numeroFila);
         tablaBody.appendChild(nuevaFila);
-        guardarEnLocalStorage();
     }
 
     function inicializarTablas() {
-        for (let i = 1; i <= 19; i++) agregarFila(); // Exactamente 19
+        for (let i = 1; i <= 19; i++) agregarFila();
     }
 
     function obtenerDatosCompletos() {
@@ -582,7 +588,8 @@
                 subtitulo: document.getElementById('subtitulo').value,
                 autor: autorInput.value,
                 fecha: document.getElementById('fecha').value,
-                numero: document.getElementById('num-poema').value
+                numero: document.getElementById('num-poema').value,
+                ultimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
             },
             versos: Array.from(tablaBody.querySelectorAll('tr')).map((fila, idx) => {
                 const input = fila.querySelector('.verso-input');
@@ -595,18 +602,20 @@
         };
     }
 
-    function restaurarDatos(datos) {
+    function restaurarDatos(datos, silencioso = false) {
         if (datos.metadata) {
             document.getElementById('titulo').value = datos.metadata.titulo || '';
             document.getElementById('subtitulo').value = datos.metadata.subtitulo || '';
             autorInput.value = datos.metadata.autor || perfilesData[currentProfile] || '';
             document.getElementById('fecha').value = datos.metadata.fecha || '';
-            document.getElementById('num-poema').value = datos.metadata.numero || '1';
+            if (!silencioso) {
+                document.getElementById('num-poema').value = datos.metadata.numero || '1';
+            }
         }
         
-        tablaBody.innerHTML = '';
-        filaCounter = 0;
         if (datos.versos && datos.versos.length > 0) {
+            tablaBody.innerHTML = '';
+            filaCounter = 0;
             datos.versos.forEach(v => {
                 const fila = crearFila(v.numero);
                 const input = fila.querySelector('.verso-input');
@@ -614,79 +623,24 @@
                 actualizarContador(input);
                 tablaBody.appendChild(fila);
             });
-            // Rellenar hasta 19 si hay menos
             if (datos.versos.length < 19) {
                 for(let i = datos.versos.length + 1; i <= 19; i++) agregarFila();
             }
-        } else {
+        }
+    }
+
+    function nuevoPoema() {
+        if (confirm("¿Crear nuevo poema?")) {
+            document.getElementById('titulo').value = '';
+            document.getElementById('subtitulo').value = '';
+            autorInput.value = perfilesData[currentProfile] || '';
+            fechaInput.valueAsDate = new Date();
+            document.getElementById('num-poema').value = '1';
+            tablaBody.innerHTML = '';
+            filaCounter = 0;
             inicializarTablas();
+            guardarEnFirebase();
         }
-    }
-
-    // Función segura para nuevo poema
-    function nuevoPoemaSeguro() {
-        // Verificar si hay texto escrito para advertir
-        const hayTexto = Array.from(tablaBody.querySelectorAll('.verso-input')).some(i => i.value.trim() !== '');
-        const hayTitulo = document.getElementById('titulo').value.trim() !== '';
-
-        if (hayTexto || hayTitulo) {
-            if (confirm("⚠️ ¡Atención! Tienes un poema en pantalla que no has guardado como archivo.\n\nSi creas uno nuevo, perderás este si no le diste a 'Guardar'.\n\n¿Estás seguro de que quieres limpiar la pantalla para un nuevo poema?")) {
-                crearNuevoPoema();
-            }
-        } else {
-            crearNuevoPoema();
-        }
-    }
-
-    function crearNuevoPoema() {
-        document.getElementById('titulo').value = '';
-        document.getElementById('subtitulo').value = '';
-        autorInput.value = perfilesData[currentProfile] || '';
-        fechaInput.valueAsDate = new Date();
-        document.getElementById('num-poema').value = '1';
-        tablaBody.innerHTML = '';
-        filaCounter = 0;
-        inicializarTablas();
-        guardarEnLocalStorage();
-        mostrarMensaje('✨ Nuevo poema creado');
-    }
-
-    function guardarProyecto() {
-        const datos = obtenerDatosCompletos();
-        const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
-        const enlace = document.createElement('a');
-        enlace.href = URL.createObjectURL(blob);
-        enlace.download = `poema_${datos.metadata.numero}_${currentProfile}.poema`;
-        enlace.click();
-        mostrarMensaje('💾 Proyecto exportado a archivo');
-    }
-
-    function cargarProyecto() { fileInput.click(); }
-
-    function procesarArchivoCargado(event) {
-        const archivo = event.target.files[0];
-        if (!archivo) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const datos = JSON.parse(e.target.result);
-                if (datos.perfil) {
-                    currentProfile = datos.perfil;
-                    localStorage.setItem('poema_profile_actual', currentProfile);
-                    if (userSelect.querySelector(`option[value="${currentProfile}"]`)) {
-                        userSelect.value = currentProfile;
-                    }
-                }
-                restaurarDatos(datos);
-                guardarEnLocalStorage();
-                mostrarMensaje('📂 Proyecto cargado');
-            } catch (err) {
-                alert('Error al leer el archivo: ' + err.message);
-            }
-        };
-        reader.readAsText(archivo);
-        event.target.value = '';
     }
 
     function obtenerDatos() { return obtenerDatosCompletos().metadata; }
@@ -734,7 +688,7 @@
     function compartir() {
         const datos = obtenerDatos();
         const versos = obtenerVersos();
-        let texto = ` ${datos.titulo}\n✍️ ${datos.autor}\n📅 ${datos.fecha} #${datos.numero}\n\n`;
+        let texto = `📜 ${datos.titulo}\n✍️ ${datos.autor}\n📅 ${datos.fecha} #${datos.numero}\n\n`;
         versos.forEach(v => texto += `${v.texto}\n`);
         
         if (navigator.share) {
