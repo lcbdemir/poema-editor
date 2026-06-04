@@ -10,9 +10,17 @@
             --border-color: hsla(0, 0%, 63%, 1);
             --text-color: hsla(0, 0%, 0%, 1);
             --table-header-color: hsla(50, 68%, 84%, 1);
-            --heart-row-color: hsla(200, 100%, 85%, 0.8);
+            --heart-row-color: hsla(240, 30%, 80%, 0.8); /* Tono lila/azul grisáceo para la fila corazón */
             --input-text-color: hsla(0, 0%, 0%, 1);
             --font-main: Arial, sans-serif;
+        }
+
+        /* EVITAR SELECCIÓN EN ELEMENTOS AUXILIARES: No se copiarán al arrastrar el mouse */
+        .no-select, .col-num, .header-label, .tools-unified-row, .top-management, .status-banner, th {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         body {
@@ -47,7 +55,7 @@
             font-size: 13px;
         }
 
-        /* Panel de Gestión Superior (Compacto) */
+        /* Panel de Gestión Superior */
         .top-management {
             background-color: rgba(0, 0, 0, 0.02);
             border-bottom: 1px solid var(--border-color);
@@ -344,7 +352,7 @@
             font-weight: bold;
         }
 
-        /* DISEÑO DE TEXTO EDITABLE DIRECTAMENTE (Para que permita copiar) */
+        /* Permite copiar el texto y respeta la selección */
         .verse-input {
             width: 100%;
             min-height: 22px;
@@ -358,9 +366,13 @@
             color: var(--input-text-color);
             white-space: pre-wrap;
             display: inline-block;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
-        /* Marcador de posición (Placeholder) para líneas vacías */
+        /* Marcador de posición (Placeholder) */
         .verse-input:empty::before {
             content: "Escribe...";
             color: #a0aec0;
@@ -553,37 +565,37 @@
 
         <!-- Tabla de Escritura -->
         <table class="sheet-table">
-            <tr>
+            <tr class="no-select">
                 <td class="header-label">Título</td>
                 <td colspan="2">
                     <input type="text" id="titulo" class="header-input" value="EL VIAJE" oninput="saveCurrentState()">
                 </td>
             </tr>
-            <tr>
+            <tr class="no-select">
                 <td class="header-label">Subtítulo</td>
                 <td colspan="2">
                     <input type="text" id="subtitulo" class="header-input" placeholder="Escriba el subtítulo aquí..." oninput="saveCurrentState()">
                 </td>
             </tr>
-            <tr>
+            <tr class="no-select">
                 <td class="header-label">Autor</td>
                 <td colspan="2">
                     <input type="text" id="autor" class="header-input" placeholder="Nombre del autor..." oninput="saveCurrentState()">
                 </td>
             </tr>
-            <tr>
+            <tr class="no-select">
                 <td class="header-label">Fecha</td>
                 <td colspan="2">
                     <input type="text" id="fecha" class="header-input" oninput="saveCurrentState()">
                 </td>
             </tr>
-            <tr>
+            <tr class="no-select">
                 <td class="header-label">#</td>
                 <td colspan="2">
                     <input type="text" id="numero_poema" class="header-input" value="005" onblur="formatPoemNumber(this)" oninput="saveCurrentState()">
                 </td>
             </tr>
-            <tr style="height: 12px; background-color: var(--table-header-color);">
+            <tr style="height: 12px; background-color: var(--table-header-color);" class="no-select">
                 <td colspan="3"></td>
             </tr>
             <tr style="font-weight: bold; text-align: center;">
@@ -611,7 +623,7 @@
     </div>
 
     <script>
-        // Base de datos local unificada en HSLA (Estructura definitiva y fija para evitar pérdidas)
+        // Base de datos local unificada en HSLA (Estructura de almacenamiento estable)
         let db = {
             profiles: {
                 "Ramón Luís Cabellos": {
@@ -627,7 +639,7 @@
                 border: { h: 0, s: 0, l: 63, a: 1.0 },
                 header: { h: 50, s: 68, l: 84, a: 1.0 },
                 text: { h: 0, s: 0, l: 0, a: 1.0 },
-                heartRow: { h: 200, s: 100, l: 85, a: 0.8 }
+                heartRow: { h: 240, s: 30, l: 80, a: 0.8 }
             }
         };
 
@@ -649,35 +661,35 @@
                 border: { h: 0, s: 0, l: 63, a: 1.0 },
                 header: { h: 50, s: 68, l: 84, a: 1.0 },
                 text: { h: 0, s: 0, l: 0, a: 1.0 },
-                heartRow: { h: 200, s: 100, l: 85, a: 0.8 }
+                heartRow: { h: 240, s: 30, l: 80, a: 0.8 }
             },
             nocturno: {
                 bg: { h: 210, s: 11, l: 15, a: 1.0 },
                 border: { h: 210, s: 9, l: 31, a: 1.0 },
                 header: { h: 210, s: 10, l: 23, a: 1.0 },
                 text: { h: 210, s: 17, l: 98, a: 1.0 },
-                heartRow: { h: 200, s: 80, l: 30, a: 0.8 }
+                heartRow: { h: 240, s: 20, l: 30, a: 0.8 }
             },
             sepia: {
                 bg: { h: 42, s: 47, l: 91, a: 1.0 },
                 border: { h: 36, s: 29, l: 67, a: 1.0 },
                 header: { h: 40, s: 44, l: 80, a: 1.0 },
                 text: { h: 32, s: 30, l: 20, a: 1.0 },
-                heartRow: { h: 24, s: 64, l: 82, a: 0.8 }
+                heartRow: { h: 240, s: 15, l: 75, a: 0.8 }
             },
             verdedelvalle: {
                 bg: { h: 120, s: 16, l: 93, a: 1.0 },
                 border: { h: 131, s: 18, l: 57, a: 1.0 },
                 header: { h: 127, s: 19, l: 84, a: 1.0 },
                 text: { h: 129, s: 30, l: 17, a: 1.0 },
-                heartRow: { h: 80, s: 45, l: 82, a: 0.8 }
+                heartRow: { h: 120, s: 25, l: 75, a: 0.8 }
             },
             atardecer: {
                 bg: { h: 0, s: 47, l: 96, a: 1.0 },
                 border: { h: 0, s: 42, l: 74, a: 1.0 },
                 header: { h: 0, s: 35, l: 87, a: 1.0 },
                 text: { h: 0, s: 37, l: 24, a: 1.0 },
-                heartRow: { h: 36, s: 70, l: 84, a: 0.8 }
+                heartRow: { h: 0, s: 30, l: 80, a: 0.8 }
             }
         };
 
@@ -716,7 +728,7 @@
                     <td>
                         <div contenteditable="true" class="verse-input" data-index="${i-1}" oninput="updateWordCount(this); saveCurrentState();"></div>
                     </td>
-                    <td class="col-words">0</td>
+                    <td class="col-words">${20 - i}</td> <!-- Métrica decreciente inicial para ejemplo -->
                 `;
                 tbody.appendChild(tr);
             }
@@ -750,7 +762,6 @@
             const input = lastFocusedInput;
 
             if (input.classList.contains('verse-input')) {
-                // Inserción para divs con contenteditable
                 const selection = window.getSelection();
                 if (selection.rangeCount > 0) {
                     const range = selection.getRangeAt(0);
@@ -766,7 +777,6 @@
                 }
                 updateWordCount(input);
             } else {
-                // Inserción para inputs tradicionales (Título, etc.)
                 const start = input.selectionStart || 0;
                 const end = input.selectionEnd || 0;
                 const text = input.value;
@@ -790,17 +800,37 @@
             loadPoemData();
         }
 
+        // PRECARGA EXACTA DEL POEMA "EL VIAJE" DE SU IMAGEN EN EL REGISTRO
         function createInitialPoemForProfile(profile) {
             const id = 'poem_' + Date.now();
-            const hoy = obtenerFechaHoy();
             profile.poems[id] = {
                 id: id,
                 titulo: "EL VIAJE",
                 subtitulo: "",
-                autor: profile.autorDefault || "",
-                fecha: hoy,
+                autor: "Ramón Luís Cabellos Bringas",
+                fecha: "04 / 06 / 2026",
                 numero: "005",
-                versos: ["Trémulo", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+                versos: [
+                    "Viajé",
+                    "tan lejos",
+                    "admirando cada frontera,",
+                    "mas sus glorias efímeras",
+                    "quebraron y oscurecieron mis alegrías.",
+                    "Creí que escalaba una montaña dorada",
+                    "y mi diligencia se embriagó de nada.",
+                    "No sirvió medir kilómetros. Entonces tuve que desarmar",
+                    "el laberinto que construí para protegerme de mí mismo:",
+                    "Cerré los ojos... ¡el universo se desplegó tras mis párpados!",
+                    "No volvía a casa, solo contemplaba asombrado mis ruinas.",
+                    "¿Ruinas? ¡Bah! Se erguían sobre un firme fundamento,",
+                    "donde podía volver a construir algo nuevo.",
+                    "Mi marchita morada hecha polvo quedó.",
+                    "Preferí mil veces mis vestigios",
+                    "pues eran esencia mía.",
+                    "No era refugio,",
+                    "sino mi",
+                    "inmensidad."
+                ]
             };
             db.activePoemId = id;
             saveToLocalStorage();
@@ -934,7 +964,7 @@
             }
         }
 
-        // --- SISTEMA DEL SELECTOR DE COLORES (CON SOPORTE DE FILA 10) ---
+        // --- SISTEMA DEL SELECTOR DE COLORES ---
 
         function setTheme(themeName) {
             db.theme = themeName;
@@ -1076,7 +1106,7 @@
             document.documentElement.style.setProperty('--bg-yellow', hslaToString(set.bg));
             document.documentElement.style.setProperty('--border-color', hslaToString(set.border));
             document.documentElement.style.setProperty('--table-header-color', hslaToString(set.header));
-            document.documentElement.style.setProperty('--heart-row-color', hslaToString(set.heartRow || { h: 200, s: 100, l: 85, a: 0.8 }));
+            document.documentElement.style.setProperty('--heart-row-color', hslaToString(set.heartRow || { h: 240, s: 30, l: 80, a: 0.8 }));
             document.documentElement.style.setProperty('--text-color', hslaToString(set.text));
             document.documentElement.style.setProperty('--input-text-color', hslaToString(set.text));
 
@@ -1087,7 +1117,7 @@
             }
         }
 
-        // --- MANEJO DE ARCHIVOS Y EXPORTACIÓN ---
+        // --- EXPORTACIÓN ---
 
         function saveCurrentState() {
             const profile = db.profiles[db.activeProfile];
@@ -1151,18 +1181,6 @@
                 if (val !== "") txt += `${idx + 1}. ${val}\n`;
             });
             return txt;
-        }
-
-        function downloadFile(content, fileName, mimeType) {
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
 
         function exportTXT() {
