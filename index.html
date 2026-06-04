@@ -37,7 +37,7 @@
             transition: background-color 0.3s, border-color 0.3s;
         }
 
-        /* Banner de Auto-guardado (Verde suave como en su imagen) */
+        /* Banner de Auto-guardado */
         .status-banner {
             background-color: #d4edda;
             color: #155724;
@@ -45,13 +45,8 @@
             padding: 10px 15px;
             font-size: 13px;
         }
-        .status-banner b {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
 
-        /* Panel de Configuración, Perfiles y Diseño */
+        /* Panel de Control (Perfiles, Temas y Paleta) */
         .control-panel {
             background-color: rgba(0, 0, 0, 0.03);
             border-bottom: 2px solid var(--border-color);
@@ -109,7 +104,36 @@
         .btn-green { background-color: #38a169; }
         .btn-red { background-color: #e53e3e; }
 
-        /* Panel de caracteres especiales (Estilo botón) */
+        /* Estilización de los Selectores de Color Interactivos (Estilo Gema) */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: 2px solid var(--border-color);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            background: none;
+            transition: transform 0.1s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        input[type="color"]:hover {
+            transform: scale(1.1);
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        /* Panel de caracteres especiales */
         .char-panel {
             background-color: rgba(255, 255, 255, 0.5);
             border: 1px solid var(--border-color);
@@ -314,28 +338,31 @@
                         <option value="dia">☀️ Día (Crema)</option>
                         <option value="nocturno">🌙 Nocturno</option>
                         <option value="sepia">📜 Sepia</option>
-                        <option value="personalizado">🎨 Personalizado</option>
+                        <option value="verdedelvalle">🌿 Verde del Valle</option>
+                        <option value="atardecer">🌅 Atardecer Rosa</option>
+                        <option value="personalizado">🎨 Personalizado (Elegir colores...)</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Paleta de colores interactiva para personalizar al gusto del usuario -->
-            <div class="panel-row" id="custom-palette-row" style="display: none; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px;">
+            <!-- Paleta de colores interactiva que activa los selectores estilo gema -->
+            <div class="panel-row" id="custom-palette-row" style="display: none; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                <span style="font-size: 13px; font-weight: bold; margin-right: 10px;">Presione sobre las gemas para abrir la paleta RVA o Hexágonos:</span>
                 <div class="group">
-                    <label>Fondo Tabla:</label>
-                    <input type="color" id="picker-bg" oninput="customizeColors()">
+                    <label>Fondo:</label>
+                    <input type="color" id="picker-bg" oninput="customizeColors()" title="Color de fondo de la hoja">
                 </div>
                 <div class="group">
                     <label>Bordes:</label>
-                    <input type="color" id="picker-border" oninput="customizeColors()">
+                    <input type="color" id="picker-border" oninput="customizeColors()" title="Color de las líneas y cuadrículas">
                 </div>
                 <div class="group">
                     <label>Cabeceras:</label>
-                    <input type="color" id="picker-header" oninput="customizeColors()">
+                    <input type="color" id="picker-header" oninput="customizeColors()" title="Color de los títulos de celda">
                 </div>
                 <div class="group">
                     <label>Texto:</label>
-                    <input type="color" id="picker-text" oninput="customizeColors()">
+                    <input type="color" id="picker-text" oninput="customizeColors()" title="Color de la tipografía">
                 </div>
             </div>
 
@@ -441,7 +468,7 @@
     </div>
 
     <script>
-        // Estructura de base de datos local mejorada
+        // Estructura de base de datos local
         let db = {
             profiles: {
                 "Ramón Luís Cabellos": {
@@ -455,14 +482,15 @@
             customColors: { bg: '#fbf5d6', border: '#a0a0a0', header: '#f0eabf', text: '#000000' }
         };
 
-        // Rastreo de campos enfocados para la inserción de caracteres especiales
         let lastFocusedInput = null;
 
-        // Temas predefinidos
+        // Paleta de Temas Preestablecidos
         const themes = {
             dia: { bg: '#fbf5d6', border: '#a0a0a0', header: '#f0eabf', text: '#000000' },
             nocturno: { bg: '#212529', border: '#495057', header: '#343a40', text: '#f8f9fa' },
-            sepia: { bg: '#f4ecd8', border: '#c3b091', header: '#e4d3b2', text: '#433422' }
+            sepia: { bg: '#f4ecd8', border: '#c3b091', header: '#e4d3b2', text: '#433422' },
+            verdedelvalle: { bg: '#e8f0e8', border: '#7fa486', header: '#cfdfd1', text: '#1e3822' },
+            atardecer: { bg: '#fbf0f0', border: '#d9a2a2', header: '#ebd2d2', text: '#542626' }
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -476,13 +504,8 @@
         function initDatabase() {
             const savedDb = localStorage.getItem('poemas_v2_db');
             if (savedDb) {
-                try {
-                    db = JSON.parse(savedDb);
-                } catch (e) {
-                    console.error("No se pudo parsear la base de datos.");
-                }
+                try { db = JSON.parse(savedDb); } catch (e) { console.error("No se pudo cargar la base de datos."); }
             }
-            // Asegurar que exista al menos un perfil
             if (Object.keys(db.profiles).length === 0) {
                 db.profiles["Ramón Luís Cabellos"] = {
                     autorDefault: "Ramón Luís Cabellos Bringas",
@@ -512,12 +535,10 @@
             }
         }
 
-        // Configuración para rastrear cuál input se utilizó por última vez
+        // Rastrear campo enfocado
         function setupFocusTracking() {
             document.addEventListener('focusin', (e) => {
-                if (e.target.tagName === 'INPUT') {
-                    lastFocusedInput = e.target;
-                }
+                if (e.target.tagName === 'INPUT') { lastFocusedInput = e.target; }
             });
         }
 
@@ -533,34 +554,22 @@
             const text = input.value;
             
             input.value = text.substring(0, start) + char + text.substring(end);
-            
-            // Colocar el cursor justo después del carácter insertado
             const newCursorPos = start + char.length;
             input.focus();
             input.setSelectionRange(newCursorPos, newCursorPos);
             
-            // Forzar actualización de conteo y guardado
-            if (input.classList.contains('verse-input')) {
-                updateWordCount(input);
-            }
+            if (input.classList.contains('verse-input')) { updateWordCount(input); }
             saveCurrentState();
         }
 
-        // Carga el perfil activo, llena selectores y carga el poema activo
+        // Cargar perfiles y poemas
         function loadActiveProfile() {
             updateProfileDropdown();
             setTheme(db.theme || 'dia');
 
             const profile = db.profiles[db.activeProfile];
-            // Asegurar que tenga poemas
-            if (Object.keys(profile.poems).length === 0) {
-                createInitialPoemForProfile(profile);
-            }
-
-            // Si el poema activo no existe en este perfil, tomar el primero disponible
-            if (!db.activePoemId || !profile.poems[db.activePoemId]) {
-                db.activePoemId = Object.keys(profile.poems)[0];
-            }
+            if (Object.keys(profile.poems).length === 0) { createInitialPoemForProfile(profile); }
+            if (!db.activePoemId || !profile.poems[db.activePoemId]) { db.activePoemId = Object.keys(profile.poems)[0]; }
 
             updatePoemDropdown();
             loadPoemData();
@@ -600,7 +609,6 @@
             });
         }
 
-        // Actualizar listas desplegables
         function updateProfileDropdown() {
             const select = document.getElementById('profile-select');
             select.innerHTML = '';
@@ -626,10 +634,10 @@
             select.value = db.activePoemId;
         }
 
-        // Gestión de Perfiles (Autores)
+        // Perfiles de autores
         function changeProfile(pName) {
             db.activeProfile = pName;
-            db.activePoemId = null; // Reiniciar para que tome el del nuevo perfil
+            db.activePoemId = null;
             saveToLocalStorage();
             loadActiveProfile();
         }
@@ -644,8 +652,7 @@
                 return;
             }
 
-            const fullName = prompt(`¿Cuál es el nombre completo que aparecerá en sus poemas? (Por defecto: ${cleanName}):`, cleanName);
-
+            const fullName = prompt(`¿Nombre completo que aparecerá en sus poemas?:`, cleanName);
             db.profiles[cleanName] = {
                 autorDefault: fullName || cleanName,
                 poems: {}
@@ -662,7 +669,7 @@
                 alert("Debe haber por lo menos un perfil guardado.");
                 return;
             }
-            if (confirm(`¿Está seguro de borrar permanentemente el perfil "${db.activeProfile}" y todos sus poemas?`)) {
+            if (confirm(`¿Está seguro de borrar permanentemente el perfil "${db.activeProfile}"?`)) {
                 delete db.profiles[db.activeProfile];
                 db.activeProfile = Object.keys(db.profiles)[0];
                 db.activePoemId = null;
@@ -671,7 +678,6 @@
             }
         }
 
-        // Gestión de Poemas
         function loadPoem(id) {
             db.activePoemId = id;
             saveToLocalStorage();
@@ -705,7 +711,7 @@
                 alert("Debe conservar al menos un poema en este perfil.");
                 return;
             }
-            if (confirm("¿Seguro que desea borrar permanentemente este poema?")) {
+            if (confirm("¿Seguro que desea borrar este poema?")) {
                 delete profile.poems[db.activePoemId];
                 db.activePoemId = Object.keys(profile.poems)[0];
                 saveToLocalStorage();
@@ -714,14 +720,13 @@
             }
         }
 
-        // Gestión de apariencia y colores personalizados
+        // Gestión de apariencia
         function setTheme(themeName) {
             db.theme = themeName;
             const customRow = document.getElementById('custom-palette-row');
 
             if (themeName === 'personalizado') {
                 customRow.style.display = 'flex';
-                // Poner valores iniciales en los pickers
                 document.getElementById('picker-bg').value = db.customColors.bg;
                 document.getElementById('picker-border').value = db.customColors.border;
                 document.getElementById('picker-header').value = db.customColors.header;
@@ -753,7 +758,6 @@
             document.documentElement.style.setProperty('--text-color', set.text);
             document.documentElement.style.setProperty('--input-text-color', set.text);
 
-            // Cambiar fondo del cuerpo del documento para acoplarse al modo claro/oscuro
             if (db.theme === 'nocturno') {
                 document.body.style.backgroundColor = '#121212';
             } else {
@@ -761,7 +765,6 @@
             }
         }
 
-        // Guardado de datos locales
         function saveCurrentState() {
             const profile = db.profiles[db.activeProfile];
             const poem = profile.poems[db.activePoemId];
@@ -775,22 +778,17 @@
 
             const inputs = document.querySelectorAll('.verse-input');
             poem.versos = Array.from(inputs).map(input => input.value);
-
             saveToLocalStorage();
 
-            // Refrescar el selector por si cambia número o título
             const select = document.getElementById('poem-select');
             const opt = select.querySelector(`option[value="${db.activePoemId}"]`);
-            if (opt) {
-                opt.textContent = `#${poem.numero || '000'} - ${poem.titulo || 'Sin título'}`;
-            }
+            if (opt) { opt.textContent = `#${poem.numero || '000'} - ${poem.titulo || 'Sin título'}`; }
         }
 
         function saveToLocalStorage() {
             localStorage.setItem('poemas_v2_db', JSON.stringify(db));
         }
 
-        // Helpers de formato y fecha
         function formatPoemNumber(input) {
             let val = input.value.trim();
             if (val !== "" && !isNaN(val)) {
@@ -802,18 +800,15 @@
         function updateWordCount(input) {
             const text = input.value.trim();
             const words = text ? text.split(/\s+/) : [];
-            const count = words.length;
-            input.closest('tr').querySelector('.col-words').innerText = count;
+            input.closest('tr').querySelector('.col-words').innerText = words.length;
         }
 
         function obtenerFechaHoy() {
             const opciones = { day: '2-digit', month: '2-digit', year: 'numeric' };
             const hoy = new Date();
-            // Formato limpio de su imagen: DD / MM / AAAA
             return hoy.toLocaleDateString('es-ES', opciones).replace(/\//g, ' / ');
         }
 
-        // Exportación de formatos
         function getConsolidatedText() {
             const titulo = document.getElementById('titulo').value || 'Sin título';
             const subtitulo = document.getElementById('subtitulo').value || '';
@@ -878,7 +873,6 @@
             html += `<h1 style="text-align:center;">${titulo}</h1>`;
             html += `<p><b>Autor:</b> ${document.getElementById('autor').value}</p>`;
             html += `<p><b>Fecha:</b> ${document.getElementById('fecha').value}</p><hr/>`;
-            
             const inputs = document.querySelectorAll('.verse-input');
             inputs.forEach(input => {
                 const verso = input.value.trim();
@@ -888,15 +882,11 @@
             downloadFile(html, 'poema.doc', 'application/msword');
         }
 
-        function exportPDF() {
-            window.print();
-        }
+        function exportPDF() { window.print(); }
 
-        // Compartir
         function shareContent() {
             const text = getConsolidatedText();
             const subject = document.getElementById('titulo').value || 'Poema';
-
             if (navigator.share) {
                 navigator.share({ title: subject, text: text }).catch(() => openFallbackModal(text, subject));
             } else {
@@ -907,22 +897,16 @@
         function openFallbackModal(text, subject) {
             const encodedText = encodeURIComponent(text);
             const encodedSubject = encodeURIComponent(subject);
-
             document.getElementById('shareEmail').href = `mailto:?subject=${encodedSubject}&body=${encodedText}`;
             document.getElementById('shareTelegram').href = `tg://msg?text=${encodedText}`;
             document.getElementById('shareWhatsApp').href = `https://api.whatsapp.com/send?text=${encodedText}`;
-            
             document.getElementById('shareModal').style.display = 'flex';
         }
 
-        function closeModal(event) {
-            document.getElementById('shareModal').style.display = 'none';
-        }
+        function closeModal(event) { document.getElementById('shareModal').style.display = 'none'; }
 
-        // Respaldo completo
         function exportBackup() {
-            const str = JSON.stringify(db, null, 2);
-            downloadFile(str, `respaldo_general_poemas.json`, 'application/json');
+            downloadFile(JSON.stringify(db, null, 2), `respaldo_general_poemas.json`, 'application/json');
         }
 
         function importBackup(event) {
@@ -940,12 +924,8 @@
                             loadActiveProfile();
                             alert("Respaldo importado correctamente.");
                         }
-                    } else {
-                        alert("El archivo no parece ser un respaldo válido.");
-                    }
-                } catch (err) {
-                    alert("Error leyendo el archivo.");
-                }
+                    } else { alert("El archivo no parece ser un respaldo válido."); }
+                } catch (err) { alert("Error leyendo el archivo."); }
             };
             reader.readAsText(file);
             event.target.value = '';
