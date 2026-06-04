@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Poemas - Sync en Tiempo Real</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Editor de Poemas - Sync</title>
     
     <!-- Librerías para PDF y Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,12 +14,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Poemas - Sync en Tiempo Real</title>
     <style>
         :root {
             --bg-color: #ffffe0;
@@ -26,53 +21,71 @@
             --header-blue: #0000ff;
             --input-bg: #fff;
             --center-row-bg: #d4f1f9;
-            --save-indicator: #27ae60;
             --sync-indicator: #9b59b6;
         }
         
-        * { box-sizing: border-box; }
+        * { 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow-x: hidden;
+            position: fixed;
+        }
         
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             background-color: #f4f4f4;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
             max-width: 900px;
             margin: 0 auto;
             background-color: var(--bg-color);
-            border: 1px solid #ccc;
-            padding: 15px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 10px;
+            padding-bottom: 80px;
+            min-height: 100vh;
         }
 
         .header-info {
             display: grid;
-            grid-template-columns: 100px 1fr;
-            gap: 8px;
-            margin-bottom: 15px;
-            font-size: 14px;
+            grid-template-columns: 80px 1fr;
+            gap: 5px;
+            margin-bottom: 10px;
+            font-size: 13px;
         }
 
         .header-info label {
             font-weight: bold;
             text-align: right;
-            padding-right: 10px;
+            padding-right: 8px;
             padding-top: 5px;
         }
 
         input[type="text"], input[type="date"], input[type="number"], select {
             border: 1px solid #999;
-            padding: 6px;
-            font-size: 14px;
+            padding: 8px;
+            font-size: 16px;
             width: 100%;
             background-color: var(--input-bg);
+            -webkit-appearance: none;
+        }
+
+        /* Evitar zoom en iOS al hacer focus */
+        @supports (-webkit-touch-callout: none) {
+            input[type="text"], input[type="date"], input[type="number"] {
+                font-size: 16px !important;
+            }
         }
 
         .title-input {
-            font-size: 18px;
+            font-size: 16px;
             color: var(--header-blue);
             font-weight: bold;
             text-align: center;
@@ -82,21 +95,21 @@
             grid-column: 1 / -1;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px;
+            gap: 8px;
+            padding: 6px;
             background-color: #e8f4fd;
             border-radius: 5px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             flex-wrap: wrap;
         }
 
-        .user-profile label { font-weight: bold; white-space: nowrap; }
-        .user-profile select { max-width: 200px; }
+        .user-profile label { font-weight: bold; }
+        .user-profile select { max-width: 150px; font-size: 14px; }
         .user-actions { margin-left: auto; display: flex; gap: 5px; }
 
         .btn-small {
-            padding: 4px 10px;
-            font-size: 12px;
+            padding: 4px 8px;
+            font-size: 11px;
             background-color: #7f8c8d;
             color: white;
             border: none;
@@ -104,26 +117,26 @@
             cursor: pointer;
         }
 
-        .btn-small:hover { background-color: #95a5a6; }
-
         .sync-status {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--sync-indicator);
-            height: 18px;
+            height: 16px;
             margin-bottom: 5px;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-color);
+            z-index: 100;
         }
 
         .sync-dot {
-            width: 8px;
-            height: 8px;
+            display: inline-block;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background-color: var(--sync-indicator);
+            margin-right: 5px;
             animation: pulse 2s infinite;
         }
 
@@ -132,39 +145,54 @@
             50% { opacity: 0.5; }
         }
 
+        .info-box {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .info-box strong { color: #155724; }
+
         .char-panel {
             grid-column: 1 / -1;
             background-color: #f0f8ff;
-            padding: 10px;
+            padding: 8px;
             border-radius: 5px;
             border: 1px solid #b8d4e8;
+            margin-top: 5px;
         }
 
-        .char-panel-title { font-weight: bold; margin-bottom: 8px; font-size: 13px; color: #2c3e50; }
-        .char-group { display: inline-block; margin-right: 20px; margin-bottom: 8px; }
-        .char-group-label { font-size: 11px; color: #666; margin-bottom: 3px; display: block; }
+        .char-panel-title { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
+        .char-group { display: inline-block; margin-right: 15px; margin-bottom: 6px; }
+        .char-group-label { font-size: 10px; color: #666; margin-bottom: 2px; display: block; }
 
         .char-btn {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 5px 8px;
             margin: 2px;
             background-color: white;
             border: 1px solid #ccc;
             border-radius: 3px;
             cursor: pointer;
             font-size: 14px;
-            min-width: 35px;
+            min-width: 30px;
             text-align: center;
+            touch-action: manipulation;
         }
-        .char-btn:hover { background-color: #e3f2fd; border-color: #2196f3; }
 
-        .table-container { overflow-x: auto; margin-bottom: 15px; }
+        .table-container { 
+            overflow-x: auto; 
+            margin-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
 
         table {
             width: 100%;
             border-collapse: collapse;
             background-color: var(--bg-color);
-            font-size: 16px;
+            font-size: 15px;
         }
 
         th, td {
@@ -174,50 +202,60 @@
             vertical-align: middle;
         }
 
-        th { background-color: #e8e8a0; font-weight: bold; padding: 8px; }
-        .col-no { width: 60px; background-color: #f0f0c0; font-weight: bold; }
+        th { 
+            background-color: #e8e8a0; 
+            font-weight: bold; 
+            padding: 6px;
+            font-size: 14px;
+        }
+        
+        .col-no { width: 50px; background-color: #f0f0c0; font-weight: bold; }
         .col-verso { text-align: left !important; }
-        .col-pal { width: 80px; background-color: #f5f5d0; font-weight: bold; }
+        .col-pal { width: 60px; background-color: #f5f5d0; font-weight: bold; }
 
         .center-row { background-color: var(--center-row-bg) !important; }
         .center-row .col-no, .center-row .col-pal { background-color: #b8e6f5 !important; }
         .center-row input { background-color: var(--center-row-bg); }
-        .center-row input:focus { background-color: #fff; }
 
         td input {
             width: 100%;
             border: none;
-            padding: 8px;
+            padding: 10px 6px;
             font-size: 16px;
             background-color: transparent;
             outline: none;
         }
-        td input:focus { background-color: #fff; box-shadow: inset 0 0 0 2px #4a90d9; }
+        td input:focus { background-color: #fff; }
         td input.verso-input { text-align: left; }
         td input.pal-input { text-align: center; background-color: #f5f5d0; font-weight: bold; }
 
         .actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
             justify-content: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px solid #ccc;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
         }
 
         button {
-            padding: 10px 16px;
+            padding: 10px 12px;
             cursor: pointer;
             border: none;
             border-radius: 5px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             color: white;
-            transition: background 0.3s;
             flex: 1;
-            min-width: 120px;
-            max-width: 200px;
+            min-width: 80px;
+            max-width: 150px;
+            touch-action: manipulation;
         }
 
         .btn-pdf { background-color: #e74c3c; }
@@ -226,29 +264,50 @@
         .btn-share { background-color: #8e44ad; }
         .btn-new { background-color: #9b59b6; }
 
-        button:hover { opacity: 0.8; }
-
-        .info-box {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 13px;
-        }
-        .info-box strong { color: #155724; }
-
+        /* Optimizaciones específicas para móvil */
         @media (max-width: 600px) {
-            .header-info { grid-template-columns: 1fr; font-size: 12px; }
-            .header-info label { text-align: left; }
-            .user-profile { flex-direction: column; align-items: flex-start; }
+            .container { padding: 5px; padding-bottom: 90px; }
+            .header-info { 
+                grid-template-columns: 60px 1fr; 
+                font-size: 12px;
+                gap: 3px;
+            }
+            .header-info label { 
+                text-align: left;
+                padding-right: 5px;
+            }
+            .user-profile { 
+                flex-direction: column; 
+                align-items: flex-start;
+                padding: 5px;
+            }
+            .user-profile select { width: 100%; max-width: none; }
             .user-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
-            .char-panel { font-size: 12px; }
+            .char-panel { font-size: 11px; padding: 6px; }
+            .char-group { margin-right: 10px; }
+            .char-btn { padding: 4px 6px; font-size: 13px; min-width: 28px; }
             table { font-size: 14px; }
-            td input { padding: 8px 5px; font-size: 14px; }
-            .col-no { width: 50px; }
-            .col-pal { width: 70px; }
-            button { min-width: 100px; font-size: 12px; padding: 8px 12px; }
+            td input { padding: 12px 6px; font-size: 16px; }
+            .col-no { width: 45px; }
+            .col-pal { width: 55px; }
+            th { padding: 5px; font-size: 13px; }
+            .actions { 
+                padding: 6px;
+                gap: 4px;
+            }
+            button { 
+                min-width: 70px; 
+                font-size: 11px; 
+                padding: 8px 6px;
+            }
+            .info-box { font-size: 11px; padding: 6px; }
+        }
+
+        /* Prevenir scroll no deseado en iOS */
+        @supports (-webkit-touch-callout: none) {
+            .table-container {
+                overflow-y: hidden;
+            }
         }
     </style>
 </head>
@@ -257,18 +316,18 @@
 
 <div class="container" id="poem-content">
     <div class="sync-status" id="sync-status">
-        <div class="sync-dot"></div>
+        <span class="sync-dot"></span>
         <span id="sync-text">Conectando...</span>
     </div>
 
     <div class="info-box">
-        <strong>✅ Sincronización automática activada</strong><br>
-        Lo que escribas aquí se guardará automáticamente y se verá en todos tus dispositivos al instante.
+        <strong>✅ Auto-guardado activado</strong><br>
+        Se sincroniza en todos tus dispositivos al instante.
     </div>
 
     <div class="header-info">
         <div class="user-profile">
-            <label for="user-select"> Perfil:</label>
+            <label for="user-select">Perfil:</label>
             <select id="user-select" onchange="cambiarPerfil()">
                 <option value="usuario1">Mi Perfil</option>
                 <option value="usuario2">Perfil 2</option>
@@ -295,14 +354,13 @@
         <input type="number" id="num-poema" value="5" min="1">
 
         <div class="char-panel">
-            <div class="char-panel-title"> Caracteres especiales (clic para insertar):</div>
+            <div class="char-panel-title">Caracteres especiales:</div>
             
             <div class="char-group">
                 <span class="char-group-label">Comillas:</span>
                 <span class="char-btn" onclick="insertarCaracter('«')">«</span>
                 <span class="char-btn" onclick="insertarCaracter('»')">»</span>
                 <span class="char-btn" onclick="insertarCaracter('"')">"</span>
-                <span class="char-btn" onclick="insertarCaracter("'")">'</span>
             </div>
             
             <div class="char-group">
@@ -312,7 +370,7 @@
             </div>
             
             <div class="char-group">
-                <span class="char-group-label">Puntos suspensivos:</span>
+                <span class="char-group-label">Puntos:</span>
                 <span class="char-btn" onclick="insertarCaracter('…')">…</span>
             </div>
         </div>
@@ -333,11 +391,11 @@
 </div>
 
 <div class="actions">
-    <button class="btn-new" onclick="nuevoPoema()">✨ Nuevo poema</button>
+    <button class="btn-new" onclick="nuevoPoema()">✨ Nuevo</button>
     <button class="btn-pdf" onclick="exportarPDF()">📄 PDF</button>
-    <button class="btn-txt" onclick="exportarTXT()"> TXT</button>
-    <button class="btn-xls" onclick="exportarXLS()"> Excel</button>
-    <button class="btn-share" onclick="compartir()">📤 Compartir</button>
+    <button class="btn-txt" onclick="exportarTXT()">TXT</button>
+    <button class="btn-xls" onclick="exportarXLS()">Excel</button>
+    <button class="btn-share" onclick="compartir()">📤</button>
 </div>
 
 <script>
@@ -354,7 +412,6 @@
     };
     // ============================================
     
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
@@ -371,7 +428,15 @@
     let perfilesData = { 'usuario1': 'Mi Perfil', 'usuario2': 'Perfil 2', 'usuario3': 'Perfil 3' };
     let isFirstLoad = true;
 
-    // Inicialización
+    // Prevenir zoom y scroll problemático en móvil
+    document.addEventListener('gesturestart', function (e) {
+        e.preventDefault();
+    });
+    
+    document.addEventListener('dblclick', function (e) {
+        e.preventDefault();
+    }, { passive: false });
+
     window.addEventListener('DOMContentLoaded', async () => {
         fechaInput.valueAsDate = new Date();
         await cargarPerfiles();
@@ -380,7 +445,6 @@
         configurarSincronizacion();
     });
 
-    // Sincronización en tiempo real
     function configurarSincronizacion() {
         db.collection('poemas').doc(getPoemaId()).onSnapshot((doc) => {
             if (doc.exists && !isFirstLoad) {
@@ -390,8 +454,8 @@
             }
             isFirstLoad = false;
         }, (error) => {
-            console.error("Error de sincronización:", error);
-            mostrarSync('Error de conexión');
+            console.error("Error:", error);
+            mostrarSync('Error');
         });
     }
 
@@ -408,8 +472,8 @@
                 await db.collection('poemas').doc(getPoemaId()).set(datos, { merge: true });
                 mostrarSync('Sincronizado ✓');
             } catch (error) {
-                console.error("Error al guardar:", error);
-                mostrarSync('Error al guardar');
+                console.error("Error:", error);
+                mostrarSync('Error');
             }
         }, 1000);
     }
@@ -457,7 +521,7 @@
     }
 
     async function nuevoPerfil() {
-        const nombre = prompt('Nombre completo del nuevo perfil:');
+        const nombre = prompt('Nombre del nuevo perfil:');
         if (nombre && nombre.trim()) {
             const nombreNormalizado = nombre.trim().toLowerCase().replace(/\s+/g, '_');
             if (!perfilesData[nombreNormalizado]) {
@@ -500,7 +564,11 @@
         const inputVerso = document.createElement('input');
         inputVerso.type = 'text';
         inputVerso.className = 'verso-input';
-        inputVerso.placeholder = 'Escribe o pega aquí...';
+        inputVerso.placeholder = 'Escribe...';
+        inputVerso.autocapitalize = 'off';
+        inputVerso.autocomplete = 'off';
+        inputVerso.autocorrect = 'off';
+        inputVerso.spellcheck = 'false';
         
         inputVerso.addEventListener('paste', function(e) {
             e.preventDefault();
@@ -529,8 +597,10 @@
                 
                 const ultimoInput = filaActual.querySelector('.verso-input');
                 if (ultimoInput) {
-                    ultimoInput.focus();
-                    ultimoInput.selectionStart = ultimoInput.selectionEnd = ultimoInput.value.length;
+                    setTimeout(() => {
+                        ultimoInput.focus();
+                        ultimoInput.selectionStart = ultimoInput.selectionEnd = ultimoInput.value.length;
+                    }, 100);
                 }
                 guardarEnFirebase();
             } else {
@@ -546,7 +616,9 @@
                 const nextRow = currentRow.nextElementSibling;
                 
                 if (nextRow && nextRow.querySelector('.verso-input')) {
-                    nextRow.querySelector('.verso-input').focus();
+                    setTimeout(() => {
+                        nextRow.querySelector('.verso-input').focus();
+                    }, 50);
                 }
             }
         });
@@ -554,6 +626,13 @@
         inputVerso.addEventListener('input', () => {
             actualizarContador(inputVerso);
             guardarEnFirebase();
+        });
+        
+        // Mejor manejo de focus en móvil
+        inputVerso.addEventListener('focus', function() {
+            setTimeout(() => {
+                this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
         });
         
         tdVerso.appendChild(inputVerso);
