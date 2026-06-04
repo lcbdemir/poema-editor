@@ -10,6 +10,7 @@
             --border-color: hsla(0, 0%, 63%, 1);
             --text-color: hsla(0, 0%, 0%, 1);
             --table-header-color: hsla(50, 68%, 84%, 1);
+            --heart-row-color: hsla(200, 100%, 85%, 0.8);
             --input-text-color: hsla(0, 0%, 0%, 1);
             --font-main: Arial, sans-serif;
         }
@@ -100,7 +101,7 @@
         .btn-green { background-color: #38a169; }
         .btn-red { background-color: #e53e3e; }
 
-        /* NUEVA FILA UNIFICADA: Caracteres especiales y Aspecto a la par */
+        /* Fila unificada de herramientas */
         .tools-unified-row {
             background-color: rgba(255, 255, 255, 0.4);
             border-bottom: 2px solid var(--border-color);
@@ -150,7 +151,7 @@
             background-color: #edf2f7;
         }
 
-        /* Panel Desplegable del Selector de Color Avanzado (Oculto por defecto) */
+        /* Panel de color desplegable */
         .custom-palette-box {
             display: none;
             background-color: #ffffff;
@@ -231,7 +232,7 @@
             transform: scale(1.2);
         }
 
-        /* Controles HSLA (Rendimiento fluido para aclarar/oscurecer) */
+        /* Controles HSLA */
         .rva-panel {
             background-color: #f7fafc;
             border: 1px solid #cbd5e0;
@@ -343,8 +344,10 @@
             font-weight: bold;
         }
 
+        /* DISEÑO DE TEXTO EDITABLE DIRECTAMENTE (Para que permita copiar) */
         .verse-input {
             width: 100%;
+            min-height: 22px;
             border: none;
             background: transparent;
             font-size: 16px;
@@ -353,10 +356,20 @@
             padding: 2px 0;
             box-sizing: border-box;
             color: var(--input-text-color);
+            white-space: pre-wrap;
+            display: inline-block;
         }
 
-        .row-highlight {
-            background-color: rgba(66, 153, 225, 0.15) !important;
+        /* Marcador de posición (Placeholder) para líneas vacías */
+        .verse-input:empty::before {
+            content: "Escribe...";
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        /* Fila Corazón número 10 destacable y configurable */
+        .row-highlight td {
+            background-color: var(--heart-row-color) !important;
         }
 
         /* Modal */
@@ -438,7 +451,7 @@
             </div>
         </div>
 
-        <!-- FILA UNIFICADA DE HERRAMIENTAS (Caracteres y Estilo) -->
+        <!-- FILA UNIFICADA DE HERRAMIENTAS -->
         <div class="tools-unified-row">
             <!-- Izquierda: Caracteres Especiales -->
             <div class="tools-section">
@@ -454,7 +467,7 @@
                 </div>
             </div>
 
-            <!-- Derecha: Selector de Temas Rápidos y botón de Personalizar -->
+            <!-- Derecha: Selector de Temas Rápidos -->
             <div class="tools-section">
                 <span class="tools-title">Aspecto:</span>
                 <select id="theme-select" class="select-custom" onchange="setTheme(this.value)">
@@ -469,7 +482,7 @@
             </div>
         </div>
 
-        <!-- PANEL DE COLOR DESPLEGABLE (Se activa en modo personalizado) -->
+        <!-- PANEL DE COLOR DESPLEGABLE -->
         <div class="custom-palette-box" id="custom-palette-container">
             <div class="palette-layout">
                 <!-- 1. Elemento a Pintar -->
@@ -484,6 +497,9 @@
                     <button id="target-header" class="target-btn" onclick="selectColorTarget('header')">
                         <span class="swatch-preview" id="swatch-preview-header"></span> Cabeceras
                     </button>
+                    <button id="target-heartRow" class="target-btn" onclick="selectColorTarget('heartRow')">
+                        <span class="swatch-preview" id="swatch-preview-heartRow"></span> Fila 10
+                    </button>
                     <button id="target-text" class="target-btn" onclick="selectColorTarget('text')">
                         <span class="swatch-preview" id="swatch-preview-text"></span> Texto
                     </button>
@@ -496,7 +512,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Controles HSLA (Especializados para aclarar, oscurecer y transparentar) -->
+                <!-- 3. Controles HSLA -->
                 <div class="rva-panel">
                     <div class="grid-title">Control de Tono, Brillo y Opacidad:</div>
                     <div class="rva-row">
@@ -509,12 +525,12 @@
                         <input type="range" id="slide-s" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
                         <span id="val-s" class="rva-value-display">100%</span>
                     </div>
-                    <div class="rva-row" title="Deslice hacia la izquierda para oscurecer y a la derecha para aclarar">
+                    <div class="rva-row">
                         <span class="rva-label" style="font-weight: bold;">💡 Brillo:</span>
                         <input type="range" id="slide-l" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
                         <span id="val-l" class="rva-value-display">50%</span>
                     </div>
-                    <div class="rva-row" title="Haga el color más transparente para fusionarlo con el fondo">
+                    <div class="rva-row">
                         <span class="rva-label" style="font-weight: bold;">🏁 Opacidad:</span>
                         <input type="range" id="slide-a" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
                         <span id="val-a" class="rva-value-display">100%</span>
@@ -523,7 +539,7 @@
             </div>
         </div>
 
-        <!-- Barra de herramientas (Exportar y Respaldar) -->
+        <!-- Barra de herramientas (Exportar) -->
         <div class="toolbar">
             <button class="btn" onclick="exportTXT()">TXT</button>
             <button class="btn" onclick="exportXLS()">Excel (XLS)</button>
@@ -595,7 +611,7 @@
     </div>
 
     <script>
-        // Estructura de base de datos local unificada en HSLA
+        // Base de datos local unificada en HSLA (Estructura definitiva y fija para evitar pérdidas)
         let db = {
             profiles: {
                 "Ramón Luís Cabellos": {
@@ -610,14 +626,14 @@
                 bg: { h: 50, s: 76, l: 91, a: 1.0 },
                 border: { h: 0, s: 0, l: 63, a: 1.0 },
                 header: { h: 50, s: 68, l: 84, a: 1.0 },
-                text: { h: 0, s: 0, l: 0, a: 1.0 }
+                text: { h: 0, s: 0, l: 0, a: 1.0 },
+                heartRow: { h: 200, s: 100, l: 85, a: 0.8 }
             }
         };
 
         let lastFocusedInput = null;
         let activeColorTarget = 'bg';
 
-        // 42 Gemas de color rápido
         const customPaletteSwatches = [
             '#ff0000', '#ff5a5a', '#ff9e9e', '#ffd2d2', '#ffe6e6', '#ffffff', '#000000',
             '#ff6600', '#ff9933', '#ffcc66', '#ffff00', '#ffff99', '#fffdeb', '#333333',
@@ -627,37 +643,41 @@
             '#cc00cc', '#ff33ff', '#ff99ff', '#ffccff', '#fff0ff', '#fbf5d6', '#f4ecd8'
         ];
 
-        // Definición de temas estables con modelo de objetos HSLA
         const themes = {
             dia: {
                 bg: { h: 50, s: 76, l: 91, a: 1.0 },
                 border: { h: 0, s: 0, l: 63, a: 1.0 },
                 header: { h: 50, s: 68, l: 84, a: 1.0 },
-                text: { h: 0, s: 0, l: 0, a: 1.0 }
+                text: { h: 0, s: 0, l: 0, a: 1.0 },
+                heartRow: { h: 200, s: 100, l: 85, a: 0.8 }
             },
             nocturno: {
                 bg: { h: 210, s: 11, l: 15, a: 1.0 },
                 border: { h: 210, s: 9, l: 31, a: 1.0 },
                 header: { h: 210, s: 10, l: 23, a: 1.0 },
-                text: { h: 210, s: 17, l: 98, a: 1.0 }
+                text: { h: 210, s: 17, l: 98, a: 1.0 },
+                heartRow: { h: 200, s: 80, l: 30, a: 0.8 }
             },
             sepia: {
                 bg: { h: 42, s: 47, l: 91, a: 1.0 },
                 border: { h: 36, s: 29, l: 67, a: 1.0 },
                 header: { h: 40, s: 44, l: 80, a: 1.0 },
-                text: { h: 32, s: 30, l: 20, a: 1.0 }
+                text: { h: 32, s: 30, l: 20, a: 1.0 },
+                heartRow: { h: 24, s: 64, l: 82, a: 0.8 }
             },
             verdedelvalle: {
                 bg: { h: 120, s: 16, l: 93, a: 1.0 },
                 border: { h: 131, s: 18, l: 57, a: 1.0 },
                 header: { h: 127, s: 19, l: 84, a: 1.0 },
-                text: { h: 129, s: 30, l: 17, a: 1.0 }
+                text: { h: 129, s: 30, l: 17, a: 1.0 },
+                heartRow: { h: 80, s: 45, l: 82, a: 0.8 }
             },
             atardecer: {
                 bg: { h: 0, s: 47, l: 96, a: 1.0 },
                 border: { h: 0, s: 42, l: 74, a: 1.0 },
                 header: { h: 0, s: 35, l: 87, a: 1.0 },
-                text: { h: 0, s: 37, l: 24, a: 1.0 }
+                text: { h: 0, s: 37, l: 24, a: 1.0 },
+                heartRow: { h: 36, s: 70, l: 84, a: 0.8 }
             }
         };
 
@@ -670,9 +690,9 @@
         });
 
         function initDatabase() {
-            const savedDb = localStorage.getItem('poemas_v2_db_hsla');
+            const savedDb = localStorage.getItem('poemas_v3_stable');
             if (savedDb) {
-                try { db = JSON.parse(savedDb); } catch (e) { console.error("Error al cargar la base de datos."); }
+                try { db = JSON.parse(savedDb); } catch (e) { console.error("Error cargando base de datos estable."); }
             }
             if (Object.keys(db.profiles).length === 0) {
                 db.profiles["Ramón Luís Cabellos"] = {
@@ -694,7 +714,7 @@
                 tr.innerHTML = `
                     <td class="col-num">${i}</td>
                     <td>
-                        <input type="text" class="verse-input" data-index="${i-1}" placeholder="Escribe..." oninput="updateWordCount(this); saveCurrentState();">
+                        <div contenteditable="true" class="verse-input" data-index="${i-1}" oninput="updateWordCount(this); saveCurrentState();"></div>
                     </td>
                     <td class="col-words">0</td>
                 `;
@@ -716,26 +736,45 @@
 
         function setupFocusTracking() {
             document.addEventListener('focusin', (e) => {
-                if (e.target.tagName === 'INPUT') { lastFocusedInput = e.target; }
+                if (e.target.tagName === 'INPUT' || e.target.classList.contains('verse-input')) { 
+                    lastFocusedInput = e.target; 
+                }
             });
         }
 
         function insertChar(char) {
             if (!lastFocusedInput) {
-                alert("Haz clic en la línea del poema o campo donde deseas insertar el carácter.");
+                alert("Haz clic primero en la línea de texto donde deseas insertar el carácter.");
                 return;
             }
             const input = lastFocusedInput;
-            const start = input.selectionStart || 0;
-            const end = input.selectionEnd || 0;
-            const text = input.value;
-            
-            input.value = text.substring(0, start) + char + text.substring(end);
-            const newCursorPos = start + char.length;
-            input.focus();
-            input.setSelectionRange(newCursorPos, newCursorPos);
-            
-            if (input.classList.contains('verse-input')) { updateWordCount(input); }
+
+            if (input.classList.contains('verse-input')) {
+                // Inserción para divs con contenteditable
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    range.deleteContents();
+                    const textNode = document.createTextNode(char);
+                    range.insertNode(textNode);
+                    range.setStartAfter(textNode);
+                    range.setEndAfter(textNode);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                } else {
+                    input.innerText += char;
+                }
+                updateWordCount(input);
+            } else {
+                // Inserción para inputs tradicionales (Título, etc.)
+                const start = input.selectionStart || 0;
+                const end = input.selectionEnd || 0;
+                const text = input.value;
+                input.value = text.substring(0, start) + char + text.substring(end);
+                const newCursorPos = start + char.length;
+                input.focus();
+                input.setSelectionRange(newCursorPos, newCursorPos);
+            }
             saveCurrentState();
         }
 
@@ -780,7 +819,7 @@
 
             const inputs = document.querySelectorAll('.verse-input');
             inputs.forEach((input, idx) => {
-                input.value = poem.versos[idx] || '';
+                input.innerText = poem.versos[idx] || '';
                 updateWordCount(input);
             });
         }
@@ -818,7 +857,7 @@
         }
 
         function addNewProfile() {
-            const name = prompt("Nombre del nuevo Perfil:");
+            const name = prompt("Escriba el nombre del nuevo Perfil de Autor:");
             if (!name || name.trim() === "") return;
             const cleanName = name.trim();
 
@@ -841,7 +880,7 @@
         function deleteProfile() {
             const keys = Object.keys(db.profiles);
             if (keys.length <= 1) {
-                alert("Debes conservar al menos un perfil.");
+                alert("Debe haber por lo menos un perfil guardado.");
                 return;
             }
             if (confirm(`¿Borrar perfil "${db.activeProfile}" permanentemente?`)) {
@@ -883,10 +922,10 @@
             const profile = db.profiles[db.activeProfile];
             const keys = Object.keys(profile.poems);
             if (keys.length <= 1) {
-                alert("Conserva al menos un poema.");
+                alert("Debe conservar al menos un poema.");
                 return;
             }
-            if (confirm("¿Seguro que deseas borrar este poema?")) {
+            if (confirm("¿Seguro que desea borrar este poema?")) {
                 delete profile.poems[db.activePoemId];
                 db.activePoemId = Object.keys(profile.poems)[0];
                 saveToLocalStorage();
@@ -895,7 +934,7 @@
             }
         }
 
-        // --- MANEJO DE ASPECTO Y COLORES CON HSLA ---
+        // --- SISTEMA DEL SELECTOR DE COLORES (CON SOPORTE DE FILA 10) ---
 
         function setTheme(themeName) {
             db.theme = themeName;
@@ -912,7 +951,6 @@
             saveToLocalStorage();
         }
 
-        // Control de Colapso del Panel Avanzado
         function toggleAdvancedColorPicker() {
             const customBox = document.getElementById('custom-palette-container');
             if (customBox.style.display === 'none' || customBox.style.display === '') {
@@ -934,7 +972,6 @@
             applyColorSet(db.customColors);
         }
 
-        // Actualizar valores de color deslizando las barras
         function updateFromSliders() {
             const h = parseInt(document.getElementById('slide-h').value);
             const s = parseInt(document.getElementById('slide-s').value);
@@ -953,7 +990,6 @@
             saveToLocalStorage();
         }
 
-        // Al presionar gema de color rápido
         function selectSwatchColor(hex) {
             const hsla = hexToHsla(hex);
             setSlidersFromHsla(hsla.h, hsla.s, hsla.l, hsla.a);
@@ -979,6 +1015,7 @@
             document.getElementById('swatch-preview-bg').style.backgroundColor = hslaToString(db.customColors.bg);
             document.getElementById('swatch-preview-border').style.backgroundColor = hslaToString(db.customColors.border);
             document.getElementById('swatch-preview-header').style.backgroundColor = hslaToString(db.customColors.header);
+            document.getElementById('swatch-preview-heartRow').style.backgroundColor = hslaToString(db.customColors.heartRow);
             document.getElementById('swatch-preview-text').style.backgroundColor = hslaToString(db.customColors.text);
         }
 
@@ -987,7 +1024,6 @@
             return `hsla(${obj.h}, ${obj.s}%, ${obj.l}%, ${obj.a})`;
         }
 
-        // Convertir Hex a HSLA para las gemas rápidas
         function hexToHsla(hex) {
             let r, g, b;
             const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
@@ -1025,7 +1061,6 @@
             };
         }
 
-        // Convertir HSLA a Hex para formatos XLS/DOCX
         function hslaToHex(h, s, l) {
             l /= 100;
             const a = s * Math.min(l, 1 - l) / 100;
@@ -1041,6 +1076,7 @@
             document.documentElement.style.setProperty('--bg-yellow', hslaToString(set.bg));
             document.documentElement.style.setProperty('--border-color', hslaToString(set.border));
             document.documentElement.style.setProperty('--table-header-color', hslaToString(set.header));
+            document.documentElement.style.setProperty('--heart-row-color', hslaToString(set.heartRow || { h: 200, s: 100, l: 85, a: 0.8 }));
             document.documentElement.style.setProperty('--text-color', hslaToString(set.text));
             document.documentElement.style.setProperty('--input-text-color', hslaToString(set.text));
 
@@ -1051,7 +1087,7 @@
             }
         }
 
-        // --- PROCESAMIENTO Y EXPORTADO ---
+        // --- MANEJO DE ARCHIVOS Y EXPORTACIÓN ---
 
         function saveCurrentState() {
             const profile = db.profiles[db.activeProfile];
@@ -1065,7 +1101,7 @@
             poem.numero = document.getElementById('numero_poema').value;
 
             const inputs = document.querySelectorAll('.verse-input');
-            poem.versos = Array.from(inputs).map(input => input.value);
+            poem.versos = Array.from(inputs).map(input => input.innerText);
             saveToLocalStorage();
 
             const select = document.getElementById('poem-select');
@@ -1074,7 +1110,7 @@
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('poemas_v2_db_hsla', JSON.stringify(db));
+            localStorage.setItem('poemas_v3_stable', JSON.stringify(db));
         }
 
         function formatPoemNumber(input) {
@@ -1086,7 +1122,7 @@
         }
 
         function updateWordCount(input) {
-            const text = input.value.trim();
+            const text = input.innerText.trim();
             const words = text ? text.split(/\s+/) : [];
             input.closest('tr').querySelector('.col-words').innerText = words.length;
         }
@@ -1111,10 +1147,22 @@
 
             const inputs = document.querySelectorAll('.verse-input');
             inputs.forEach((input, idx) => {
-                const val = input.value.trim();
+                const val = input.innerText.trim();
                 if (val !== "") txt += `${idx + 1}. ${val}\n`;
             });
             return txt;
+        }
+
+        function downloadFile(content, fileName, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         function exportTXT() {
@@ -1139,7 +1187,7 @@
             const rows = document.querySelectorAll('.verse-row');
             rows.forEach(row => {
                 const num = row.querySelector('.col-num').innerText;
-                const verso = row.querySelector('.verse-input').value;
+                const verso = row.querySelector('.verse-input').innerText;
                 const palabras = row.querySelector('.col-words').innerText;
                 html += `<tr><td>${num}</td><td>${verso}</td><td>${palabras}</td></tr>`;
             });
@@ -1155,7 +1203,7 @@
             html += `<p><b>Fecha:</b> ${document.getElementById('fecha').value}</p><hr/>`;
             const inputs = document.querySelectorAll('.verse-input');
             inputs.forEach(input => {
-                const verso = input.value.trim();
+                const verso = input.innerText.trim();
                 if (verso !== "") html += `<p>${verso}</p>`;
             });
             html += `</body></html>`;
