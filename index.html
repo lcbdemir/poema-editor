@@ -10,12 +10,12 @@
             --border-color: hsla(0, 0%, 63%, 1);
             --text-color: hsla(0, 0%, 0%, 1);
             --table-header-color: hsla(50, 68%, 84%, 1);
-            --heart-row-color: hsla(240, 30%, 80%, 0.8); /* Tono lila/azul grisáceo para la fila corazón */
+            --heart-row-color: hsla(240, 30%, 80%, 0.8); /* Lila grisáceo para la fila 10 */
             --input-text-color: hsla(0, 0%, 0%, 1);
             --font-main: Arial, sans-serif;
         }
 
-        /* EVITAR SELECCIÓN EN ELEMENTOS AUXILIARES: No se copiarán al arrastrar el mouse */
+        /* EVITAR SELECCIÓN EN ELEMENTOS AUXILIARES */
         .no-select, .col-num, .header-label, .tools-unified-row, .top-management, .status-banner, th {
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -55,7 +55,7 @@
             font-size: 13px;
         }
 
-        /* Panel de Gestión Superior */
+        /* Panel de Gestión Superior (Compacto) */
         .top-management {
             background-color: rgba(0, 0, 0, 0.02);
             border-bottom: 1px solid var(--border-color);
@@ -352,7 +352,7 @@
             font-weight: bold;
         }
 
-        /* Permite copiar el texto y respeta la selección */
+        /* Caja de texto editable */
         .verse-input {
             width: 100%;
             min-height: 22px;
@@ -372,7 +372,6 @@
             user-select: text;
         }
 
-        /* Marcador de posición (Placeholder) */
         .verse-input:empty::before {
             content: "Escribe...";
             color: #a0aec0;
@@ -553,13 +552,16 @@
 
         <!-- Barra de herramientas (Exportar) -->
         <div class="toolbar">
-            <button class="btn" onclick="exportTXT()">TXT</button>
+            <button class="btn btn-green" onclick="copyColumnsToClipboard()" title="Copia los versos y métricas formateados en columnas para pegar directo en LibreOffice Calc">📋 Copiar Versos + Métrica</button>
+            <button class="btn" style="background-color: #2b6cb0;" onclick="document.getElementById('txt-import-file').click()">Importar .TXT</button>
+            <input type="file" id="txt-import-file" style="display: none;" accept=".txt" onchange="importTXT(event)">
+            <button class="btn" onclick="exportTXT()">Exportar TXT</button>
             <button class="btn" onclick="exportXLS()">Excel (XLS)</button>
             <button class="btn" onclick="exportDOCX()">Word (DOC)</button>
             <button class="btn" onclick="exportPDF()">Imprimir / PDF</button>
             <button class="btn btn-blue" onclick="shareContent()">Compartir</button>
-            <button class="btn" style="background-color: #5a67d8;" onclick="exportBackup()">Copia Seguridad</button>
-            <button class="btn" style="background-color: #5a67d8;" onclick="document.getElementById('import-file').click()">Importar Copia</button>
+            <button class="btn" style="background-color: #5a67d8;" onclick="exportBackup()">Exportar Copia</button>
+            <button class="btn" style="background-color: #5a67d8;" onclick="document.getElementById('import-file').click()">Restaurar Copia</button>
             <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importBackup(event)">
         </div>
 
@@ -723,14 +725,66 @@
                 const tr = document.createElement('tr');
                 tr.className = 'verse-row';
                 if (i === 10) tr.classList.add('row-highlight');
-                tr.innerHTML = `
-                    <td class="col-num">${i}</td>
-                    <td>
-                        <div contenteditable="true" class="verse-input" data-index="${i-1}" oninput="updateWordCount(this); saveCurrentState();"></div>
-                    </td>
-                    <td class="col-words">${20 - i}</td> <!-- Métrica decreciente inicial para ejemplo -->
-                `;
+                
+                // Columna N.°
+                const colNum = document.createElement('td');
+                colNum.className = 'col-num';
+                colNum.innerText = i;
+                
+                // Columna Verso (Caja editable)
+                const colVerse = document.createElement('td');
+                const div = document.createElement('div');
+                div.contentEditable = "true";
+                div.className = 'verse-input';
+                div.setAttribute('data-index', i - 1);
+                div.addEventListener('input', function() {
+                    updateWordCount(this);
+                    saveCurrentState();
+                });
+                div.addEventListener('paste', handleSmartPaste); // PEGADO INTELIGENTE
+                colVerse.appendChild(div);
+                
+                // Columna Palabras
+                const colWords = document.createElement('td');
+                colWords.className = 'col-words';
+                colWords.innerText = '0';
+                
+                tr.appendChild(colNum);
+                tr.appendChild(colVerse);
+                tr.appendChild(colWords);
                 tbody.appendChild(tr);
+            }
+        }
+
+        // CONTROL DE PEGADO INTELIGENTE (Procesa columnas de LibreOffice Calc y saltos de línea)
+        function handleSmartPaste(e) {
+            e.preventDefault();
+            const clipboardData = e.clipboardData || window.clipboardData;
+            const pastedText = clipboardData.getData('text/plain');
+            
+            // Separar el texto pegado por saltos de línea
+            const lines = pastedText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== "");
+            
+            if (lines.length > 1) {
+                const startIndex = parseInt(this.getAttribute('data-index'));
+                const inputs = document.querySelectorAll('.verse-input');
+                
+                lines.forEach((line, offset) => {
+                    const targetIndex = startIndex + offset;
+                    if (targetIndex < inputs.length) {
+                        // Si se copia una tabla, Calc separa columnas con tabuladores. Tomamos solo la primera columna (el verso)
+                        const cleanLine = line.split('\t')[0]; 
+                        inputs[targetIndex].innerText = cleanLine;
+                        updateWordCount(inputs[targetIndex]);
+                    }
+                });
+                saveCurrentState();
+            } else {
+                // Pegado normal de una sola línea limpiando estilos complejos
+                const text = pastedText;
+                document.execCommand('insertText', false, text);
+                updateWordCount(this);
+                saveCurrentState();
             }
         }
 
@@ -800,7 +854,7 @@
             loadPoemData();
         }
 
-        // PRECARGA EXACTA DEL POEMA "EL VIAJE" DE SU IMAGEN EN EL REGISTRO
+        // PRECARGA EXACTA DE SU POEMA "EL VIAJE" (Con su autoría, fecha, número y estructura)
         function createInitialPoemForProfile(profile) {
             const id = 'poem_' + Date.now();
             profile.poems[id] = {
@@ -1117,7 +1171,52 @@
             }
         }
 
-        // --- EXPORTACIÓN ---
+        // --- EXPORTACIÓN E IMPORTACIÓN ---
+
+        // Función automatizada para copiar las columnas Verso y Palabra sin usar selección manual incómoda
+        function copyColumnsToClipboard() {
+            let clipText = "";
+            const rows = document.querySelectorAll('.verse-row');
+            rows.forEach(row => {
+                const verso = row.querySelector('.verse-input').innerText.trim();
+                const palabras = row.querySelector('.col-words').innerText.trim();
+                
+                // Formateado con un tabulador "\t", permitiendo que Excel o Calc lo reconozcan como dos columnas distintas
+                clipText += `${verso}\t${palabras}\n`;
+            });
+
+            navigator.clipboard.writeText(clipText).then(() => {
+                alert("Columnas copiadas al portapapeles. Listo para pegar directamente en LibreOffice Calc o Excel.");
+            }).catch(() => {
+                alert("No se pudo copiar automáticamente. Intenta realizar la selección manual.");
+            });
+        }
+
+        // Importación de archivos planos TXT
+        function importTXT(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l !== "");
+                const inputs = document.querySelectorAll('.verse-input');
+                
+                inputs.forEach((input, idx) => {
+                    if (idx < lines.length) {
+                        input.innerText = lines[idx];
+                    } else {
+                        input.innerText = '';
+                    }
+                    updateWordCount(input);
+                });
+                saveCurrentState();
+                alert("Poema importado exitosamente desde el archivo plano TXT.");
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
 
         function saveCurrentState() {
             const profile = db.profiles[db.activeProfile];
