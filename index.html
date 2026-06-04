@@ -2,794 +2,954 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Editor de Poemas - Sync</title>
-    
-    <!-- Librerías para PDF y Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creador de Poemas</title>
     <style>
         :root {
-            --bg-color: #ffffe0;
-            --border-color: #000;
-            --header-blue: #0000ff;
-            --input-bg: #fff;
-            --center-row-bg: #d4f1f9;
-            --sync-indicator: #9b59b6;
+            --bg-yellow: #fbf5d6;
+            --border-color: #a0a0a0;
+            --text-color: #000000;
+            --table-header-color: #f0eabf;
+            --input-text-color: #000000;
+            --font-main: Arial, sans-serif;
         }
-        
-        * { 
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow-x: hidden;
-            position: fixed;
-        }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background-color: #f4f4f4;
-            -webkit-font-smoothing: antialiased;
+            font-family: var(--font-main);
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background-color: var(--bg-color);
-            padding: 10px;
-            padding-bottom: 80px;
-            min-height: 100vh;
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--bg-yellow);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
-        .header-info {
-            display: grid;
-            grid-template-columns: 80px 1fr;
-            gap: 5px;
-            margin-bottom: 10px;
+        /* Banner de Auto-guardado (Verde suave como en su imagen) */
+        .status-banner {
+            background-color: #d4edda;
+            color: #155724;
+            border-bottom: 1px solid #c3e6cb;
+            padding: 10px 15px;
             font-size: 13px;
         }
-
-        .header-info label {
-            font-weight: bold;
-            text-align: right;
-            padding-right: 8px;
-            padding-top: 5px;
+        .status-banner b {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        input[type="text"], input[type="date"], input[type="number"], select {
-            border: 1px solid #999;
-            padding: 8px;
-            font-size: 16px;
-            width: 100%;
-            background-color: var(--input-bg);
-            -webkit-appearance: none;
+        /* Panel de Configuración, Perfiles y Diseño */
+        .control-panel {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-bottom: 2px solid var(--border-color);
+            padding: 15px;
         }
 
-        /* Evitar zoom en iOS al hacer focus */
-        @supports (-webkit-touch-callout: none) {
-            input[type="text"], input[type="date"], input[type="number"] {
-                font-size: 16px !important;
-            }
+        .panel-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .panel-row:last-child {
+            margin-bottom: 0;
         }
 
-        .title-input {
-            font-size: 16px;
-            color: var(--header-blue);
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .user-profile {
-            grid-column: 1 / -1;
+        .group {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px;
-            background-color: #e8f4fd;
-            border-radius: 5px;
-            margin-bottom: 8px;
-            flex-wrap: wrap;
         }
 
-        .user-profile label { font-weight: bold; }
-        .user-profile select { max-width: 150px; font-size: 14px; }
-        .user-actions { margin-left: auto; display: flex; gap: 5px; }
+        label {
+            font-weight: bold;
+            font-size: 14px;
+        }
 
-        .btn-small {
-            padding: 4px 8px;
-            font-size: 11px;
-            background-color: #7f8c8d;
+        .select-custom {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            color: black;
+            font-size: 13px;
+        }
+
+        /* Botones generales */
+        .btn {
+            background-color: #718096;
             color: white;
             border: none;
-            border-radius: 3px;
+            padding: 6px 12px;
+            border-radius: 4px;
             cursor: pointer;
-        }
-
-        .sync-status {
-            text-align: center;
-            font-size: 11px;
-            color: var(--sync-indicator);
-            height: 16px;
-            margin-bottom: 5px;
+            font-size: 13px;
             font-weight: bold;
-            position: sticky;
-            top: 0;
-            background: var(--bg-color);
-            z-index: 100;
+            transition: opacity 0.2s;
         }
-
-        .sync-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: var(--sync-indicator);
-            margin-right: 5px;
-            animation: pulse 2s infinite;
+        .btn:hover {
+            opacity: 0.9;
         }
+        .btn-blue { background-color: #3182ce; }
+        .btn-green { background-color: #38a169; }
+        .btn-red { background-color: #e53e3e; }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .info-box {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            padding: 8px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            font-size: 12px;
-        }
-        .info-box strong { color: #155724; }
-
+        /* Panel de caracteres especiales (Estilo botón) */
         .char-panel {
-            grid-column: 1 / -1;
-            background-color: #f0f8ff;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #b8d4e8;
-            margin-top: 5px;
-        }
-
-        .char-panel-title { font-weight: bold; margin-bottom: 6px; font-size: 12px; }
-        .char-group { display: inline-block; margin-right: 15px; margin-bottom: 6px; }
-        .char-group-label { font-size: 10px; color: #666; margin-bottom: 2px; display: block; }
-
-        .char-btn {
-            display: inline-block;
-            padding: 5px 8px;
-            margin: 2px;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 14px;
-            min-width: 30px;
-            text-align: center;
-            touch-action: manipulation;
-        }
-
-        .table-container { 
-            overflow-x: auto; 
-            margin-bottom: 10px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--bg-color);
-            font-size: 15px;
-        }
-
-        th, td {
+            background-color: rgba(255, 255, 255, 0.5);
             border: 1px solid var(--border-color);
-            padding: 0;
-            text-align: center;
-            vertical-align: middle;
+            border-radius: 6px;
+            padding: 10px;
+            margin: 10px 15px;
         }
-
-        th { 
-            background-color: #e8e8a0; 
-            font-weight: bold; 
-            padding: 6px;
-            font-size: 14px;
+        .char-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        
-        .col-no { width: 50px; background-color: #f0f0c0; font-weight: bold; }
-        .col-verso { text-align: left !important; }
-        .col-pal { width: 60px; background-color: #f5f5d0; font-weight: bold; }
-
-        .center-row { background-color: var(--center-row-bg) !important; }
-        .center-row .col-no, .center-row .col-pal { background-color: #b8e6f5 !important; }
-        .center-row input { background-color: var(--center-row-bg); }
-
-        td input {
-            width: 100%;
-            border: none;
-            padding: 10px 6px;
-            font-size: 16px;
-            background-color: transparent;
-            outline: none;
-        }
-        td input:focus { background-color: #fff; }
-        td input.verso-input { text-align: left; }
-        td input.pal-input { text-align: center; background-color: #f5f5d0; font-weight: bold; }
-
-        .actions {
+        .char-group {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
+        }
+        .char-btn {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            min-width: 35px;
+            height: 35px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            color: black;
+        }
+        .char-btn:hover {
+            background-color: #edf2f7;
+        }
+
+        /* Barra de herramientas para exportar */
+        .toolbar {
+            background-color: rgba(0, 0, 0, 0.05);
+            border-bottom: 2px solid var(--border-color);
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* Tabla principal de versos */
+        .sheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: transparent;
+        }
+
+        .sheet-table td, .sheet-table th {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .header-label {
+            font-weight: bold;
+            width: 120px;
+            text-align: left;
+            background-color: var(--table-header-color);
+        }
+
+        .header-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-family: var(--font-main);
+            outline: none;
+            box-sizing: border-box;
+            color: var(--input-text-color);
+        }
+
+        #titulo {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a56db;
+            text-transform: uppercase;
+        }
+
+        /* Estilo de la tabla de versos */
+        .col-num {
+            width: 50px;
+            text-align: center;
+            font-weight: bold;
+            background-color: var(--table-header-color);
+        }
+
+        .col-words {
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+            background-color: var(--table-header-color);
+        }
+
+        .col-verse th {
+            text-align: center;
+            background-color: var(--table-header-color);
+            font-weight: bold;
+        }
+
+        .verse-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-family: var(--font-main);
+            outline: none;
+            padding: 2px 0;
+            box-sizing: border-box;
+            color: var(--input-text-color);
+        }
+
+        .row-highlight {
+            background-color: rgba(66, 153, 225, 0.15) !important;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 8px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center; align-items: center;
             z-index: 1000;
         }
-
-        button {
-            padding: 10px 12px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            font-size: 12px;
+        .modal-content {
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .share-link {
+            display: block;
+            padding: 10px;
+            background-color: #edf2f7;
+            color: #2d3748;
+            text-decoration: none;
+            border-radius: 4px;
             font-weight: bold;
-            color: white;
-            flex: 1;
-            min-width: 80px;
-            max-width: 150px;
-            touch-action: manipulation;
         }
 
-        .btn-pdf { background-color: #e74c3c; }
-        .btn-txt { background-color: #3498db; }
-        .btn-xls { background-color: #27ae60; }
-        .btn-share { background-color: #8e44ad; }
-        .btn-new { background-color: #9b59b6; }
-
-        /* Optimizaciones específicas para móvil */
-        @media (max-width: 600px) {
-            .container { padding: 5px; padding-bottom: 90px; }
-            .header-info { 
-                grid-template-columns: 60px 1fr; 
-                font-size: 12px;
-                gap: 3px;
+        /* Ocultar elementos al imprimir */
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
             }
-            .header-info label { 
-                text-align: left;
-                padding-right: 5px;
+            .toolbar, .control-panel, .char-panel, .status-banner, .modal {
+                display: none !important;
             }
-            .user-profile { 
-                flex-direction: column; 
-                align-items: flex-start;
-                padding: 5px;
-            }
-            .user-profile select { width: 100%; max-width: none; }
-            .user-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
-            .char-panel { font-size: 11px; padding: 6px; }
-            .char-group { margin-right: 10px; }
-            .char-btn { padding: 4px 6px; font-size: 13px; min-width: 28px; }
-            table { font-size: 14px; }
-            td input { padding: 12px 6px; font-size: 16px; }
-            .col-no { width: 45px; }
-            .col-pal { width: 55px; }
-            th { padding: 5px; font-size: 13px; }
-            .actions { 
-                padding: 6px;
-                gap: 4px;
-            }
-            button { 
-                min-width: 70px; 
-                font-size: 11px; 
-                padding: 8px 6px;
-            }
-            .info-box { font-size: 11px; padding: 6px; }
-        }
-
-        /* Prevenir scroll no deseado en iOS */
-        @supports (-webkit-touch-callout: none) {
-            .table-container {
-                overflow-y: hidden;
+            .container {
+                box-shadow: none;
+                border: 1px solid black;
             }
         }
     </style>
 </head>
-
 <body>
 
-<div class="container" id="poem-content">
-    <div class="sync-status" id="sync-status">
-        <span class="sync-dot"></span>
-        <span id="sync-text">Conectando...</span>
-    </div>
+    <div class="container">
+        <!-- Banner Auto-guardado -->
+        <div class="status-banner">
+            <b>✅ Auto-guardado activado</b>
+            <span>Se almacena en la memoria del navegador al instante de forma segura.</span>
+        </div>
 
-    <div class="info-box">
-        <strong>✅ Auto-guardado activado</strong><br>
-        Se sincroniza en todos tus dispositivos al instante.
-    </div>
+        <!-- Panel de Control (Perfiles, Temas y Paleta) -->
+        <div class="control-panel">
+            <div class="panel-row">
+                <!-- Gestión de Autores -->
+                <div class="sync-group group">
+                    <label for="profile-select">Perfil de Autor:</label>
+                    <select id="profile-select" class="select-custom" onchange="changeProfile(this.value)">
+                        <!-- Autores dinámicos -->
+                    </select>
+                    <button class="btn btn-blue" onclick="addNewProfile()">+ Nuevo Perfil</button>
+                    <button class="btn btn-red" onclick="deleteProfile()" title="Eliminar este perfil">Eliminar</button>
+                </div>
 
-    <div class="header-info">
-        <div class="user-profile">
-            <label for="user-select">Perfil:</label>
-            <select id="user-select" onchange="cambiarPerfil()">
-                <option value="usuario1">Mi Perfil</option>
-                <option value="usuario2">Perfil 2</option>
-                <option value="usuario3">Perfil 3</option>
-            </select>
-            <div class="user-actions">
-                <button class="btn-small" onclick="nuevoPerfil()">+ Nuevo</button>
+                <!-- Selección de Temas Rápidos -->
+                <div class="sync-group group">
+                    <label for="theme-select">Modo:</label>
+                    <select id="theme-select" class="select-custom" onchange="setTheme(this.value)">
+                        <option value="dia">☀️ Día (Crema)</option>
+                        <option value="nocturno">🌙 Nocturno</option>
+                        <option value="sepia">📜 Sepia</option>
+                        <option value="personalizado">🎨 Personalizado</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Paleta de colores interactiva para personalizar al gusto del usuario -->
+            <div class="panel-row" id="custom-palette-row" style="display: none; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px;">
+                <div class="group">
+                    <label>Fondo Tabla:</label>
+                    <input type="color" id="picker-bg" oninput="customizeColors()">
+                </div>
+                <div class="group">
+                    <label>Bordes:</label>
+                    <input type="color" id="picker-border" oninput="customizeColors()">
+                </div>
+                <div class="group">
+                    <label>Cabeceras:</label>
+                    <input type="color" id="picker-header" oninput="customizeColors()">
+                </div>
+                <div class="group">
+                    <label>Texto:</label>
+                    <input type="color" id="picker-text" oninput="customizeColors()">
+                </div>
+            </div>
+
+            <!-- Navegación de Poemas -->
+            <div class="panel-row" style="margin-top: 10px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+                <div class="group">
+                    <label for="poem-select">Poema Activo:</label>
+                    <select id="poem-select" class="select-custom" onchange="loadPoem(this.value)">
+                        <!-- Poemas del autor activo -->
+                    </select>
+                    <button class="btn btn-green" onclick="createNewPoem()">➕ Nuevo Poema</button>
+                    <button class="btn btn-red" onclick="deleteCurrentPoem()">🗑️ Borrar Poema</button>
+                </div>
+                <div class="group">
+                    <button class="btn" onclick="exportBackup()" title="Guarda una copia de seguridad para transferir a otro dispositivo">Exportar Respaldo</button>
+                    <button class="btn" onclick="document.getElementById('import-file').click()">Importar Respaldo</button>
+                    <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importBackup(event)">
+                </div>
             </div>
         </div>
 
-        <label>Título</label>
-        <input type="text" id="titulo" placeholder="EL VIAJE" class="title-input">
-        
-        <label>Subtítulo</label>
-        <input type="text" id="subtitulo" placeholder="">
-        
-        <label>Autor</label>
-        <input type="text" id="autor" placeholder="Se completa automáticamente">
-        
-        <label>Fecha</label>
-        <input type="date" id="fecha">
-        
-        <label>#</label>
-        <input type="number" id="num-poema" value="5" min="1">
-
+        <!-- Teclado de Caracteres Especiales -->
         <div class="char-panel">
-            <div class="char-panel-title">Caracteres especiales:</div>
-            
+            <div class="char-title">Caracteres Especiales (Haz clic para insertar en el texto):</div>
             <div class="char-group">
-                <span class="char-group-label">Comillas:</span>
-                <span class="char-btn" onclick="insertarCaracter('«')">«</span>
-                <span class="char-btn" onclick="insertarCaracter('»')">»</span>
-                <span class="char-btn" onclick="insertarCaracter('"')">"</span>
-            </div>
-            
-            <div class="char-group">
-                <span class="char-group-label">Guiones:</span>
-                <span class="char-btn" onclick="insertarCaracter('—')">—</span>
-                <span class="char-btn" onclick="insertarCaracter('–')">–</span>
-            </div>
-            
-            <div class="char-group">
-                <span class="char-group-label">Puntos:</span>
-                <span class="char-btn" onclick="insertarCaracter('…')">…</span>
+                <button class="char-btn" onclick="insertChar('«')" title="Comilla angular izquierda">«</button>
+                <button class="char-btn" onclick="insertChar('»')" title="Comilla angular derecha">»</button>
+                <button class="char-btn" onclick="insertChar('“')" title="Comilla doble inglesa abierta">“</button>
+                <button class="char-btn" onclick="insertChar('”')" title="Comilla doble inglesa cerrada">”</button>
+                <button class="char-btn" onclick="insertChar('—')" title="Guión largo / Raya">—</button>
+                <button class="char-btn" onclick="insertChar('–')" title="Guión medio">–</button>
+                <button class="char-btn" onclick="insertChar('…')" title="Puntos suspensivos">…</button>
             </div>
         </div>
-    </div>
 
-    <div class="table-container">
-        <table id="tabla-poema">
-            <thead>
-                <tr>
-                    <th class="col-no">N.°</th>
-                    <th class="col-verso">Verso</th>
-                    <th class="col-pal">Palabras</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-body"></tbody>
+        <!-- Barra de herramientas (Exportar) -->
+        <div class="toolbar">
+            <button class="btn" onclick="exportTXT()">Exportar TXT</button>
+            <button class="btn" onclick="exportXLS()">Exportar XLS (Excel)</button>
+            <button class="btn" onclick="exportDOCX()">Exportar DOC (Word)</button>
+            <button class="btn" onclick="exportPDF()">Exportar PDF / Imprimir</button>
+            <button class="btn btn-blue" onclick="shareContent()">Compartir</button>
+        </div>
+
+        <!-- Tabla de Escritura -->
+        <table class="sheet-table">
+            <tr>
+                <td class="header-label">Título</td>
+                <td colspan="2">
+                    <input type="text" id="titulo" class="header-input" value="EL VIAJE" oninput="saveCurrentState()">
+                </td>
+            </tr>
+            <tr>
+                <td class="header-label">Subtítulo</td>
+                <td colspan="2">
+                    <input type="text" id="subtitulo" class="header-input" placeholder="Escriba el subtítulo aquí..." oninput="saveCurrentState()">
+                </td>
+            </tr>
+            <tr>
+                <td class="header-label">Autor</td>
+                <td colspan="2">
+                    <input type="text" id="autor" class="header-input" placeholder="Nombre del autor..." oninput="saveCurrentState()">
+                </td>
+            </tr>
+            <tr>
+                <td class="header-label">Fecha</td>
+                <td colspan="2">
+                    <input type="text" id="fecha" class="header-input" oninput="saveCurrentState()">
+                </td>
+            </tr>
+            <tr>
+                <td class="header-label">#</td>
+                <td colspan="2">
+                    <input type="text" id="numero_poema" class="header-input" value="005" onblur="formatPoemNumber(this)" oninput="saveCurrentState()">
+                </td>
+            </tr>
+            <tr style="height: 12px; background-color: var(--table-header-color);">
+                <td colspan="3"></td>
+            </tr>
+            <tr style="font-weight: bold; text-align: center;">
+                <th class="col-num">N.º</th>
+                <th>Verso</th>
+                <th class="col-words">Palabras</th>
+            </tr>
+            <tbody id="verses-body">
+                <!-- Filas autogeneradas -->
+            </tbody>
         </table>
     </div>
-</div>
 
-<div class="actions">
-    <button class="btn-new" onclick="nuevoPoema()">✨ Nuevo</button>
-    <button class="btn-pdf" onclick="exportarPDF()">📄 PDF</button>
-    <button class="btn-txt" onclick="exportarTXT()">TXT</button>
-    <button class="btn-xls" onclick="exportarXLS()">Excel</button>
-    <button class="btn-share" onclick="compartir()">📤</button>
-</div>
+    <!-- Modal para compartir -->
+    <div id="shareModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3>Compartir Poema</h3>
+            <p>Selecciona la vía para enviar el poema actual:</p>
+            <div class="modal-links">
+                <a id="shareEmail" href="#" target="_blank" class="share-link">📧 Correo Electrónico</a>
+                <a id="shareTelegram" href="#" target="_blank" class="share-link">✈️ Telegram Directo</a>
+                <a id="shareWhatsApp" href="#" target="_blank" class="share-link">💬 WhatsApp</a>
+                <button class="btn" style="margin-top: 10px; background-color: #e53e3e;" onclick="document.getElementById('shareModal').style.display='none'">Cerrar</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-    // ============================================
-    // 🔥 TU CONFIGURACIÓN DE FIREBASE
-    // ============================================
-    const firebaseConfig = {
-        apiKey: "AIzaSyDoJ-GfkACyZrM322oCW5kH_Bu1TrUH5Y4",
-        authDomain: "poema100-sync.firebaseapp.com",
-        projectId: "poema100-sync",
-        storageBucket: "poema100-sync.firebasestorage.app",
-        messagingSenderId: "880127934344",
-        appId: "1:880127934344:web:2042fa37e9bb904474843d"
-    };
-    // ============================================
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    
-    const fechaInput = document.getElementById('fecha');
-    const numInput = document.getElementById('num-poema');
-    const tablaBody = document.getElementById('tabla-body');
-    const syncStatus = document.getElementById('sync-text');
-    const userSelect = document.getElementById('user-select');
-    const autorInput = document.getElementById('autor');
-    
-    let filaCounter = 0;
-    let currentProfile = 'usuario1';
-    let debounceTimer = null;
-    let perfilesData = { 'usuario1': 'Mi Perfil', 'usuario2': 'Perfil 2', 'usuario3': 'Perfil 3' };
-    let isFirstLoad = true;
-
-    // Prevenir zoom y scroll problemático en móvil
-    document.addEventListener('gesturestart', function (e) {
-        e.preventDefault();
-    });
-    
-    document.addEventListener('dblclick', function (e) {
-        e.preventDefault();
-    }, { passive: false });
-
-    window.addEventListener('DOMContentLoaded', async () => {
-        fechaInput.valueAsDate = new Date();
-        await cargarPerfiles();
-        await inicializarPoema();
-        inicializarTablas();
-        configurarSincronizacion();
-    });
-
-    function configurarSincronizacion() {
-        db.collection('poemas').doc(getPoemaId()).onSnapshot((doc) => {
-            if (doc.exists && !isFirstLoad) {
-                const datos = doc.data();
-                restaurarDatos(datos, false);
-                mostrarSync('Sincronizado ✓');
-            }
-            isFirstLoad = false;
-        }, (error) => {
-            console.error("Error:", error);
-            mostrarSync('Error');
-        });
-    }
-
-    function getPoemaId() {
-        return `poema_${currentProfile}_${numInput.value || '1'}`;
-    }
-
-    async function guardarEnFirebase() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(async () => {
-            try {
-                mostrarSync('Guardando...');
-                const datos = obtenerDatosCompletos();
-                await db.collection('poemas').doc(getPoemaId()).set(datos, { merge: true });
-                mostrarSync('Sincronizado ✓');
-            } catch (error) {
-                console.error("Error:", error);
-                mostrarSync('Error');
-            }
-        }, 1000);
-    }
-
-    function mostrarSync(texto) {
-        syncStatus.textContent = texto;
-    }
-
-    numInput.addEventListener('change', function() {
-        let val = parseInt(this.value);
-        if (!isNaN(val)) this.value = String(val).padStart(3, '0');
-        isFirstLoad = true;
-        inicializarPoema();
-    });
-
-    async function cargarPerfiles() {
-        const doc = await db.collection('perfiles').doc('lista').get();
-        if (doc.exists) {
-            perfilesData = doc.data();
-        }
-        
-        userSelect.innerHTML = '';
-        Object.keys(perfilesData).forEach(key => {
-            const opt = document.createElement('option');
-            opt.value = key;
-            opt.textContent = perfilesData[key];
-            userSelect.appendChild(opt);
-        });
-        
-        currentProfile = localStorage.getItem('poema_profile_actual') || 'usuario1';
-        if (userSelect.querySelector(`option[value="${currentProfile}"]`)) {
-            userSelect.value = currentProfile;
-        }
-        
-        autorInput.value = perfilesData[currentProfile] || '';
-    }
-
-    async function cambiarPerfil() {
-        currentProfile = userSelect.value;
-        localStorage.setItem('poema_profile_actual', currentProfile);
-        autorInput.value = perfilesData[currentProfile] || '';
-        isFirstLoad = true;
-        await inicializarPoema();
-        mostrarSync(`Perfil: ${perfilesData[currentProfile]}`);
-    }
-
-    async function nuevoPerfil() {
-        const nombre = prompt('Nombre del nuevo perfil:');
-        if (nombre && nombre.trim()) {
-            const nombreNormalizado = nombre.trim().toLowerCase().replace(/\s+/g, '_');
-            if (!perfilesData[nombreNormalizado]) {
-                perfilesData[nombreNormalizado] = nombre.trim();
-                await db.collection('perfiles').doc('lista').set(perfilesData);
-                await cargarPerfiles();
-                userSelect.value = nombreNormalizado;
-                cambiarPerfil();
-            }
-        }
-    }
-
-    async function inicializarPoema() {
-        mostrarSync('Cargando...');
-        const doc = await db.collection('poemas').doc(getPoemaId()).get();
-        
-        if (doc.exists) {
-            restaurarDatos(doc.data(), true);
-        } else {
-            const datosVacios = obtenerDatosCompletos();
-            await db.collection('poemas').doc(getPoemaId()).set(datosVacios);
-        }
-    }
-
-    function crearFila(numero) {
-        const fila = document.createElement('tr');
-        fila.dataset.filaId = ++filaCounter;
-        
-        if (numero === 10) {
-            fila.classList.add('center-row');
-        }
-        
-        const tdNo = document.createElement('td');
-        tdNo.className = 'col-no';
-        tdNo.textContent = numero;
-        fila.appendChild(tdNo);
-        
-        const tdVerso = document.createElement('td');
-        tdVerso.className = 'col-verso';
-        const inputVerso = document.createElement('input');
-        inputVerso.type = 'text';
-        inputVerso.className = 'verso-input';
-        inputVerso.placeholder = 'Escribe...';
-        inputVerso.autocapitalize = 'off';
-        inputVerso.autocomplete = 'off';
-        inputVerso.autocorrect = 'off';
-        inputVerso.spellcheck = 'false';
-        
-        inputVerso.addEventListener('paste', function(e) {
-            e.preventDefault();
-            const textoPegado = (e.clipboardData || window.clipboardData).getData('text');
-            const lineas = textoPegado.split(/\r?\n/);
-            
-            if (lineas.length > 1) {
-                inputVerso.value = lineas[0].trim();
-                actualizarContador(inputVerso);
-                
-                let filaActual = fila;
-                for (let i = 1; i < lineas.length; i++) {
-                    let siguienteFila = filaActual.nextElementSibling;
-                    if (!siguienteFila && tablaBody.children.length < 19) {
-                        agregarFila();
-                        siguienteFila = filaActual.nextElementSibling;
-                    }
-                    
-                    if (siguienteFila) {
-                        const inputSiguiente = siguienteFila.querySelector('.verso-input');
-                        inputSiguiente.value = lineas[i].trim();
-                        actualizarContador(inputSiguiente);
-                        filaActual = siguienteFila;
-                    }
+    <script>
+        // Estructura de base de datos local mejorada
+        let db = {
+            profiles: {
+                "Ramón Luís Cabellos": {
+                    autorDefault: "Ramón Luís Cabellos Bringas",
+                    poems: {}
                 }
-                
-                const ultimoInput = filaActual.querySelector('.verso-input');
-                if (ultimoInput) {
-                    setTimeout(() => {
-                        ultimoInput.focus();
-                        ultimoInput.selectionStart = ultimoInput.selectionEnd = ultimoInput.value.length;
-                    }, 100);
-                }
-                guardarEnFirebase();
-            } else {
-                document.execCommand('insertText', false, lineas[0]);
-                guardarEnFirebase();
-            }
-        });
-        
-        inputVerso.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const currentRow = this.closest('tr');
-                const nextRow = currentRow.nextElementSibling;
-                
-                if (nextRow && nextRow.querySelector('.verso-input')) {
-                    setTimeout(() => {
-                        nextRow.querySelector('.verso-input').focus();
-                    }, 50);
-                }
-            }
-        });
-
-        inputVerso.addEventListener('input', () => {
-            actualizarContador(inputVerso);
-            guardarEnFirebase();
-        });
-        
-        // Mejor manejo de focus en móvil
-        inputVerso.addEventListener('focus', function() {
-            setTimeout(() => {
-                this.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 300);
-        });
-        
-        tdVerso.appendChild(inputVerso);
-        fila.appendChild(tdVerso);
-        
-        const tdPal = document.createElement('td');
-        tdPal.className = 'col-pal';
-        const inputPal = document.createElement('input');
-        inputPal.type = 'text';
-        inputPal.className = 'pal-input';
-        inputPal.readOnly = true;
-        inputPal.value = '0';
-        tdPal.appendChild(inputPal);
-        fila.appendChild(tdPal);
-        
-        return fila;
-    }
-
-    function actualizarContador(inputVerso) {
-        const texto = inputVerso.value.trim();
-        const palabras = texto === '' ? 0 : texto.split(/\s+/).filter(p => p.length > 0).length;
-        const fila = inputVerso.closest('tr');
-        const inputPal = fila.querySelector('.pal-input');
-        inputPal.value = palabras;
-    }
-
-    function agregarFila() {
-        const numeroFila = tablaBody.children.length + 1;
-        if (numeroFila > 19) return;
-        const nuevaFila = crearFila(numeroFila);
-        tablaBody.appendChild(nuevaFila);
-    }
-
-    function inicializarTablas() {
-        for (let i = 1; i <= 19; i++) agregarFila();
-    }
-
-    function obtenerDatosCompletos() {
-        return {
-            perfil: currentProfile,
-            metadata: {
-                titulo: document.getElementById('titulo').value,
-                subtitulo: document.getElementById('subtitulo').value,
-                autor: autorInput.value,
-                fecha: document.getElementById('fecha').value,
-                numero: document.getElementById('num-poema').value,
-                ultimaActualizacion: firebase.firestore.FieldValue.serverTimestamp()
             },
-            versos: Array.from(tablaBody.querySelectorAll('tr')).map((fila, idx) => {
-                const input = fila.querySelector('.verso-input');
-                return {
-                    numero: idx + 1,
-                    texto: input.value,
-                    palabras: input.value.trim() ? input.value.trim().split(/\s+/).filter(p => p.length > 0).length : 0
+            activeProfile: "Ramón Luís Cabellos",
+            activePoemId: null,
+            theme: "dia",
+            customColors: { bg: '#fbf5d6', border: '#a0a0a0', header: '#f0eabf', text: '#000000' }
+        };
+
+        // Rastreo de campos enfocados para la inserción de caracteres especiales
+        let lastFocusedInput = null;
+
+        // Temas predefinidos
+        const themes = {
+            dia: { bg: '#fbf5d6', border: '#a0a0a0', header: '#f0eabf', text: '#000000' },
+            nocturno: { bg: '#212529', border: '#495057', header: '#343a40', text: '#f8f9fa' },
+            sepia: { bg: '#f4ecd8', border: '#c3b091', header: '#e4d3b2', text: '#433422' }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initDatabase();
+            buildVersesTable();
+            loadActiveProfile();
+            setupFocusTracking();
+        });
+
+        // Inicializar base de datos
+        function initDatabase() {
+            const savedDb = localStorage.getItem('poemas_v2_db');
+            if (savedDb) {
+                try {
+                    db = JSON.parse(savedDb);
+                } catch (e) {
+                    console.error("No se pudo parsear la base de datos.");
+                }
+            }
+            // Asegurar que exista al menos un perfil
+            if (Object.keys(db.profiles).length === 0) {
+                db.profiles["Ramón Luís Cabellos"] = {
+                    autorDefault: "Ramón Luís Cabellos Bringas",
+                    poems: {}
                 };
-            })
-        };
-    }
+                db.activeProfile = "Ramón Luís Cabellos";
+            }
+            saveToLocalStorage();
+        }
 
-    function restaurarDatos(datos, silencioso = false) {
-        if (datos.metadata) {
-            document.getElementById('titulo').value = datos.metadata.titulo || '';
-            document.getElementById('subtitulo').value = datos.metadata.subtitulo || '';
-            autorInput.value = datos.metadata.autor || perfilesData[currentProfile] || '';
-            document.getElementById('fecha').value = datos.metadata.fecha || '';
-            if (!silencioso) {
-                document.getElementById('num-poema').value = datos.metadata.numero || '1';
+        // Crear la tabla con 19 filas
+        function buildVersesTable() {
+            const tbody = document.getElementById('verses-body');
+            tbody.innerHTML = '';
+            for (let i = 1; i <= 19; i++) {
+                const tr = document.createElement('tr');
+                tr.className = 'verse-row';
+                if (i === 10) tr.classList.add('row-highlight');
+                tr.innerHTML = `
+                    <td class="col-num">${i}</td>
+                    <td>
+                        <input type="text" class="verse-input" data-index="${i-1}" placeholder="Escribe..." oninput="updateWordCount(this); saveCurrentState();">
+                    </td>
+                    <td class="col-words">0</td>
+                `;
+                tbody.appendChild(tr);
             }
         }
-        
-        if (datos.versos && datos.versos.length > 0) {
-            tablaBody.innerHTML = '';
-            filaCounter = 0;
-            datos.versos.forEach(v => {
-                const fila = crearFila(v.numero);
-                const input = fila.querySelector('.verso-input');
-                input.value = v.texto || '';
-                actualizarContador(input);
-                tablaBody.appendChild(fila);
+
+        // Configuración para rastrear cuál input se utilizó por última vez
+        function setupFocusTracking() {
+            document.addEventListener('focusin', (e) => {
+                if (e.target.tagName === 'INPUT') {
+                    lastFocusedInput = e.target;
+                }
             });
-            if (datos.versos.length < 19) {
-                for(let i = datos.versos.length + 1; i <= 19; i++) agregarFila();
+        }
+
+        // Insertar caracteres especiales en la posición del cursor
+        function insertChar(char) {
+            if (!lastFocusedInput) {
+                alert("Primero haz clic en la línea del poema o campo donde deseas insertar el carácter.");
+                return;
+            }
+            const input = lastFocusedInput;
+            const start = input.selectionStart || 0;
+            const end = input.selectionEnd || 0;
+            const text = input.value;
+            
+            input.value = text.substring(0, start) + char + text.substring(end);
+            
+            // Colocar el cursor justo después del carácter insertado
+            const newCursorPos = start + char.length;
+            input.focus();
+            input.setSelectionRange(newCursorPos, newCursorPos);
+            
+            // Forzar actualización de conteo y guardado
+            if (input.classList.contains('verse-input')) {
+                updateWordCount(input);
+            }
+            saveCurrentState();
+        }
+
+        // Carga el perfil activo, llena selectores y carga el poema activo
+        function loadActiveProfile() {
+            updateProfileDropdown();
+            setTheme(db.theme || 'dia');
+
+            const profile = db.profiles[db.activeProfile];
+            // Asegurar que tenga poemas
+            if (Object.keys(profile.poems).length === 0) {
+                createInitialPoemForProfile(profile);
+            }
+
+            // Si el poema activo no existe en este perfil, tomar el primero disponible
+            if (!db.activePoemId || !profile.poems[db.activePoemId]) {
+                db.activePoemId = Object.keys(profile.poems)[0];
+            }
+
+            updatePoemDropdown();
+            loadPoemData();
+        }
+
+        function createInitialPoemForProfile(profile) {
+            const id = 'poem_' + Date.now();
+            const hoy = obtenerFechaHoy();
+            profile.poems[id] = {
+                id: id,
+                titulo: "EL VIAJE",
+                subtitulo: "",
+                autor: profile.autorDefault || "",
+                fecha: hoy,
+                numero: "005",
+                versos: ["Trémulo", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]
+            };
+            db.activePoemId = id;
+            saveToLocalStorage();
+        }
+
+        function loadPoemData() {
+            const profile = db.profiles[db.activeProfile];
+            const poem = profile.poems[db.activePoemId];
+            if (!poem) return;
+
+            document.getElementById('titulo').value = poem.titulo || '';
+            document.getElementById('subtitulo').value = poem.subtitulo || '';
+            document.getElementById('autor').value = poem.autor || '';
+            document.getElementById('fecha').value = poem.fecha || '';
+            document.getElementById('numero_poema').value = poem.numero || '';
+
+            const inputs = document.querySelectorAll('.verse-input');
+            inputs.forEach((input, idx) => {
+                input.value = poem.versos[idx] || '';
+                updateWordCount(input);
+            });
+        }
+
+        // Actualizar listas desplegables
+        function updateProfileDropdown() {
+            const select = document.getElementById('profile-select');
+            select.innerHTML = '';
+            Object.keys(db.profiles).forEach(pName => {
+                const opt = document.createElement('option');
+                opt.value = pName;
+                opt.textContent = pName;
+                select.appendChild(opt);
+            });
+            select.value = db.activeProfile;
+        }
+
+        function updatePoemDropdown() {
+            const select = document.getElementById('poem-select');
+            select.innerHTML = '';
+            const profile = db.profiles[db.activeProfile];
+            Object.values(profile.poems).forEach(poem => {
+                const opt = document.createElement('option');
+                opt.value = poem.id;
+                opt.textContent = `#${poem.numero || '000'} - ${poem.titulo || 'Sin título'}`;
+                select.appendChild(opt);
+            });
+            select.value = db.activePoemId;
+        }
+
+        // Gestión de Perfiles (Autores)
+        function changeProfile(pName) {
+            db.activeProfile = pName;
+            db.activePoemId = null; // Reiniciar para que tome el del nuevo perfil
+            saveToLocalStorage();
+            loadActiveProfile();
+        }
+
+        function addNewProfile() {
+            const name = prompt("Escriba el nombre del nuevo Perfil de Autor:");
+            if (!name || name.trim() === "") return;
+            const cleanName = name.trim();
+
+            if (db.profiles[cleanName]) {
+                alert("Este perfil ya existe.");
+                return;
+            }
+
+            const fullName = prompt(`¿Cuál es el nombre completo que aparecerá en sus poemas? (Por defecto: ${cleanName}):`, cleanName);
+
+            db.profiles[cleanName] = {
+                autorDefault: fullName || cleanName,
+                poems: {}
+            };
+            db.activeProfile = cleanName;
+            db.activePoemId = null;
+            saveToLocalStorage();
+            loadActiveProfile();
+        }
+
+        function deleteProfile() {
+            const keys = Object.keys(db.profiles);
+            if (keys.length <= 1) {
+                alert("Debe haber por lo menos un perfil guardado.");
+                return;
+            }
+            if (confirm(`¿Está seguro de borrar permanentemente el perfil "${db.activeProfile}" y todos sus poemas?`)) {
+                delete db.profiles[db.activeProfile];
+                db.activeProfile = Object.keys(db.profiles)[0];
+                db.activePoemId = null;
+                saveToLocalStorage();
+                loadActiveProfile();
             }
         }
-    }
 
-    function nuevoPoema() {
-        if (confirm("¿Crear nuevo poema?")) {
-            document.getElementById('titulo').value = '';
-            document.getElementById('subtitulo').value = '';
-            autorInput.value = perfilesData[currentProfile] || '';
-            fechaInput.valueAsDate = new Date();
-            document.getElementById('num-poema').value = '1';
-            tablaBody.innerHTML = '';
-            filaCounter = 0;
-            inicializarTablas();
-            guardarEnFirebase();
+        // Gestión de Poemas
+        function loadPoem(id) {
+            db.activePoemId = id;
+            saveToLocalStorage();
+            loadPoemData();
         }
-    }
 
-    function obtenerDatos() { return obtenerDatosCompletos().metadata; }
-    function obtenerVersos() { return obtenerDatosCompletos().versos.filter(v => v.texto.trim() !== ''); }
-
-    function exportarPDF() {
-        const elemento = document.getElementById('poem-content');
-        const datos = obtenerDatos();
-        const opciones = {
-            margin: 10,
-            filename: `poema_${datos.numero}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        html2pdf().set(opciones).from(elemento).save();
-    }
-
-    function exportarTXT() {
-        const datos = obtenerDatos();
-        const versos = obtenerVersos();
-        let contenido = `Título: ${datos.titulo}\nAutor: ${datos.autor}\nFecha: ${datos.fecha} #${datos.numero}\n\n`;
-        versos.forEach(v => contenido += `${v.texto}\n`);
-        
-        const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
-        const enlace = document.createElement('a');
-        enlace.href = URL.createObjectURL(blob);
-        enlace.download = `poema_${datos.numero}.txt`;
-        enlace.click();
-    }
-
-    function exportarXLS() {
-        const wb = XLSX.utils.book_new();
-        const datos = obtenerDatos();
-        const versos = obtenerVersos();
-        const ws_data = [
-            ["Título", datos.titulo], ["Autor", datos.autor], ["Fecha", datos.fecha], ["#", datos.numero],
-            [], ["N.°", "Verso", "Palabras"]
-        ];
-        versos.forEach(v => ws_data.push([v.numero, v.texto, v.palabras]));
-        const ws = XLSX.utils.aoa_to_sheet(ws_data);
-        ws['!cols'] = [{wch: 5}, {wch: 40}, {wch: 10}];
-        XLSX.utils.book_append_sheet(wb, ws, "Poema");
-        XLSX.writeFile(wb, `poema_${datos.numero}.xls`);
-    }
-
-    function compartir() {
-        const datos = obtenerDatos();
-        const versos = obtenerVersos();
-        let texto = `📜 ${datos.titulo}\n✍️ ${datos.autor}\n📅 ${datos.fecha} #${datos.numero}\n\n`;
-        versos.forEach(v => texto += `${v.texto}\n`);
-        
-        if (navigator.share) {
-            navigator.share({ title: datos.titulo, text: texto }).catch(err => console.log('Error:', err));
-        } else {
-            navigator.clipboard.writeText(texto).then(() => alert('Texto copiado.'));
+        function createNewPoem() {
+            const profile = db.profiles[db.activeProfile];
+            const id = 'poem_' + Date.now();
+            const hoy = obtenerFechaHoy();
+            
+            profile.poems[id] = {
+                id: id,
+                titulo: "NUEVO POEMA",
+                subtitulo: "",
+                autor: profile.autorDefault || "",
+                fecha: hoy,
+                numero: String(Object.keys(profile.poems).length + 1).padStart(3, '0'),
+                versos: Array(19).fill("")
+            };
+            db.activePoemId = id;
+            saveToLocalStorage();
+            updatePoemDropdown();
+            loadPoemData();
         }
-    }
-</script>
 
+        function deleteCurrentPoem() {
+            const profile = db.profiles[db.activeProfile];
+            const keys = Object.keys(profile.poems);
+            if (keys.length <= 1) {
+                alert("Debe conservar al menos un poema en este perfil.");
+                return;
+            }
+            if (confirm("¿Seguro que desea borrar permanentemente este poema?")) {
+                delete profile.poems[db.activePoemId];
+                db.activePoemId = Object.keys(profile.poems)[0];
+                saveToLocalStorage();
+                updatePoemDropdown();
+                loadPoemData();
+            }
+        }
+
+        // Gestión de apariencia y colores personalizados
+        function setTheme(themeName) {
+            db.theme = themeName;
+            const customRow = document.getElementById('custom-palette-row');
+
+            if (themeName === 'personalizado') {
+                customRow.style.display = 'flex';
+                // Poner valores iniciales en los pickers
+                document.getElementById('picker-bg').value = db.customColors.bg;
+                document.getElementById('picker-border').value = db.customColors.border;
+                document.getElementById('picker-header').value = db.customColors.header;
+                document.getElementById('picker-text').value = db.customColors.text;
+                applyColorSet(db.customColors);
+            } else {
+                customRow.style.display = 'none';
+                applyColorSet(themes[themeName]);
+            }
+            saveToLocalStorage();
+        }
+
+        function customizeColors() {
+            const newColors = {
+                bg: document.getElementById('picker-bg').value,
+                border: document.getElementById('picker-border').value,
+                header: document.getElementById('picker-header').value,
+                text: document.getElementById('picker-text').value
+            };
+            db.customColors = newColors;
+            applyColorSet(newColors);
+            saveToLocalStorage();
+        }
+
+        function applyColorSet(set) {
+            document.documentElement.style.setProperty('--bg-yellow', set.bg);
+            document.documentElement.style.setProperty('--border-color', set.border);
+            document.documentElement.style.setProperty('--table-header-color', set.header);
+            document.documentElement.style.setProperty('--text-color', set.text);
+            document.documentElement.style.setProperty('--input-text-color', set.text);
+
+            // Cambiar fondo del cuerpo del documento para acoplarse al modo claro/oscuro
+            if (db.theme === 'nocturno') {
+                document.body.style.backgroundColor = '#121212';
+            } else {
+                document.body.style.backgroundColor = '#f7f7f7';
+            }
+        }
+
+        // Guardado de datos locales
+        function saveCurrentState() {
+            const profile = db.profiles[db.activeProfile];
+            const poem = profile.poems[db.activePoemId];
+            if (!poem) return;
+
+            poem.titulo = document.getElementById('titulo').value;
+            poem.subtitulo = document.getElementById('subtitulo').value;
+            poem.autor = document.getElementById('autor').value;
+            poem.fecha = document.getElementById('fecha').value;
+            poem.numero = document.getElementById('numero_poema').value;
+
+            const inputs = document.querySelectorAll('.verse-input');
+            poem.versos = Array.from(inputs).map(input => input.value);
+
+            saveToLocalStorage();
+
+            // Refrescar el selector por si cambia número o título
+            const select = document.getElementById('poem-select');
+            const opt = select.querySelector(`option[value="${db.activePoemId}"]`);
+            if (opt) {
+                opt.textContent = `#${poem.numero || '000'} - ${poem.titulo || 'Sin título'}`;
+            }
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('poemas_v2_db', JSON.stringify(db));
+        }
+
+        // Helpers de formato y fecha
+        function formatPoemNumber(input) {
+            let val = input.value.trim();
+            if (val !== "" && !isNaN(val)) {
+                input.value = String(val).padStart(3, '0');
+                saveCurrentState();
+            }
+        }
+
+        function updateWordCount(input) {
+            const text = input.value.trim();
+            const words = text ? text.split(/\s+/) : [];
+            const count = words.length;
+            input.closest('tr').querySelector('.col-words').innerText = count;
+        }
+
+        function obtenerFechaHoy() {
+            const opciones = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            const hoy = new Date();
+            // Formato limpio de su imagen: DD / MM / AAAA
+            return hoy.toLocaleDateString('es-ES', opciones).replace(/\//g, ' / ');
+        }
+
+        // Exportación de formatos
+        function getConsolidatedText() {
+            const titulo = document.getElementById('titulo').value || 'Sin título';
+            const subtitulo = document.getElementById('subtitulo').value || '';
+            const autor = document.getElementById('autor').value || 'Anónimo';
+            const fecha = document.getElementById('fecha').value || '';
+            const numero = document.getElementById('numero_poema').value || '000';
+
+            let txt = `${titulo.toUpperCase()}\n`;
+            if (subtitulo) txt += `${subtitulo}\n`;
+            txt += `Autor: ${autor}\nFecha: ${fecha}\nPoema: #${numero}\n`;
+            txt += `====================================\n\n`;
+
+            const inputs = document.querySelectorAll('.verse-input');
+            inputs.forEach((input, idx) => {
+                const val = input.value.trim();
+                if (val !== "") txt += `${idx + 1}. ${val}\n`;
+            });
+            return txt;
+        }
+
+        function downloadFile(content, fileName, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportTXT() {
+            downloadFile(getConsolidatedText(), 'poema.txt', 'text/plain;charset=utf-8');
+        }
+
+        function exportXLS() {
+            const titulo = document.getElementById('titulo').value || 'Poema';
+            let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">`;
+            html += `<head><meta charset="utf-8"></head><body><table border="1">`;
+            html += `<tr><td style="font-weight:bold; background-color:#f0eabf;">Título</td><td colspan="2">${titulo}</td></tr>`;
+            html += `<tr><td style="font-weight:bold; background-color:#f0eabf;">Subtítulo</td><td colspan="2">${document.getElementById('subtitulo').value}</td></tr>`;
+            html += `<tr><td style="font-weight:bold; background-color:#f0eabf;">Autor</td><td colspan="2">${document.getElementById('autor').value}</td></tr>`;
+            html += `<tr><td style="font-weight:bold; background-color:#f0eabf;">Fecha</td><td colspan="2">${document.getElementById('fecha').value}</td></tr>`;
+            html += `<tr><td style="font-weight:bold; background-color:#f0eabf;">#</td><td colspan="2">${document.getElementById('numero_poema').value}</td></tr>`;
+            html += `<tr style="font-weight:bold; background-color:#f0eabf;"><td>N.º</td><td>Verso</td><td>Palabras</td></tr>`;
+
+            const rows = document.querySelectorAll('.verse-row');
+            rows.forEach(row => {
+                const num = row.querySelector('.col-num').innerText;
+                const verso = row.querySelector('.verse-input').value;
+                const palabras = row.querySelector('.col-words').innerText;
+                html += `<tr><td>${num}</td><td>${verso}</td><td>${palabras}</td></tr>`;
+            });
+            html += `</table></body></html>`;
+            downloadFile(html, 'poema.xls', 'application/vnd.ms-excel');
+        }
+
+        function exportDOCX() {
+            const titulo = document.getElementById('titulo').value || 'Poema';
+            let html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>`;
+            html += `<h1 style="text-align:center;">${titulo}</h1>`;
+            html += `<p><b>Autor:</b> ${document.getElementById('autor').value}</p>`;
+            html += `<p><b>Fecha:</b> ${document.getElementById('fecha').value}</p><hr/>`;
+            
+            const inputs = document.querySelectorAll('.verse-input');
+            inputs.forEach(input => {
+                const verso = input.value.trim();
+                if (verso !== "") html += `<p>${verso}</p>`;
+            });
+            html += `</body></html>`;
+            downloadFile(html, 'poema.doc', 'application/msword');
+        }
+
+        function exportPDF() {
+            window.print();
+        }
+
+        // Compartir
+        function shareContent() {
+            const text = getConsolidatedText();
+            const subject = document.getElementById('titulo').value || 'Poema';
+
+            if (navigator.share) {
+                navigator.share({ title: subject, text: text }).catch(() => openFallbackModal(text, subject));
+            } else {
+                openFallbackModal(text, subject);
+            }
+        }
+
+        function openFallbackModal(text, subject) {
+            const encodedText = encodeURIComponent(text);
+            const encodedSubject = encodeURIComponent(subject);
+
+            document.getElementById('shareEmail').href = `mailto:?subject=${encodedSubject}&body=${encodedText}`;
+            document.getElementById('shareTelegram').href = `tg://msg?text=${encodedText}`;
+            document.getElementById('shareWhatsApp').href = `https://api.whatsapp.com/send?text=${encodedText}`;
+            
+            document.getElementById('shareModal').style.display = 'flex';
+        }
+
+        function closeModal(event) {
+            document.getElementById('shareModal').style.display = 'none';
+        }
+
+        // Respaldo completo
+        function exportBackup() {
+            const str = JSON.stringify(db, null, 2);
+            downloadFile(str, `respaldo_general_poemas.json`, 'application/json');
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && imported.profiles) {
+                        if (confirm("¿Desea importar el respaldo? Esto sobrescribirá los perfiles actuales.")) {
+                            db = imported;
+                            saveToLocalStorage();
+                            loadActiveProfile();
+                            alert("Respaldo importado correctamente.");
+                        }
+                    } else {
+                        alert("El archivo no parece ser un respaldo válido.");
+                    }
+                } catch (err) {
+                    alert("Error leyendo el archivo.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+    </script>
 </body>
 </html>
