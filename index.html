@@ -3,31 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creador de Poemas</title>
+    <title>Creador de Poemas - 19 Filas</title>
     <style>
         :root {
             --bg-yellow: hsla(50, 76%, 91%, 1);
             --border-color: hsla(0, 0%, 63%, 1);
             --text-color: hsla(0, 0%, 0%, 1);
             --table-header-color: hsla(50, 68%, 84%, 1);
-            --heart-row-color: hsla(240, 30%, 80%, 0.8); /* Lila grisáceo para la fila 10 */
+            --heart-row-color: hsla(240, 30%, 80%, 0.8);
             --input-text-color: hsla(0, 0%, 0%, 1);
             --font-main: Arial, sans-serif;
-        }
-
-        /* EVITAR SELECCIÓN EN ELEMENTOS AUXILIARES */
-        .no-select, .col-num, .header-label, .tools-unified-row, .top-management, .status-banner, th {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
         body {
             font-family: var(--font-main);
             background-color: #f7f7f7;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -50,1331 +42,577 @@
         .status-banner {
             background-color: #d4edda;
             color: #155724;
-            border-bottom: 1px solid #c3e6cb;
-            padding: 10px 15px;
+            padding: 8px 15px;
             font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
         }
 
-        /* Panel de Gestión Superior (Compacto) */
+        /* Panel Superior */
         .top-management {
             background-color: rgba(0, 0, 0, 0.02);
             border-bottom: 1px solid var(--border-color);
             padding: 12px 15px;
         }
-
-        .panel-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        label {
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .select-custom {
-            padding: 5px 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            background-color: white;
-            color: black;
-            font-size: 13px;
-        }
+        .panel-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between; }
+        .group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        label { font-weight: bold; font-size: 14px; }
+        .select-custom { padding: 5px 8px; border-radius: 4px; border: 1px solid var(--border-color); background-color: white; color: black; font-size: 13px; }
 
         /* Botones generales */
         .btn {
-            background-color: #718096;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            transition: opacity 0.2s;
+            background-color: #718096; color: white; border: none; padding: 6px 12px; border-radius: 4px;
+            cursor: pointer; font-size: 13px; font-weight: bold; transition: opacity 0.2s;
         }
-        .btn:hover {
-            opacity: 0.9;
-        }
+        .btn:hover { opacity: 0.9; }
         .btn-blue { background-color: #3182ce; }
         .btn-green { background-color: #38a169; }
         .btn-red { background-color: #e53e3e; }
+        .btn-purple { background-color: #805ad5; }
 
-        /* Fila unificada de herramientas */
+        /* Fila de herramientas */
         .tools-unified-row {
-            background-color: rgba(255, 255, 255, 0.4);
-            border-bottom: 2px solid var(--border-color);
-            padding: 10px 15px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
-            align-items: center;
+            background-color: rgba(255, 255, 255, 0.4); border-bottom: 2px solid var(--border-color);
+            padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center;
         }
-
-        .tools-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .tools-title {
-            font-size: 12px;
-            font-weight: bold;
-            color: #4a5568;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-
-        .char-group {
-            display: flex;
-            gap: 5px;
-        }
-
+        .tools-section { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .tools-title { font-size: 12px; font-weight: bold; color: #4a5568; text-transform: uppercase; white-space: nowrap; }
+        .char-group { display: flex; gap: 5px; flex-wrap: wrap; }
         .char-btn {
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            min-width: 32px;
-            height: 32px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: black;
+            background-color: white; border: 1px solid var(--border-color); border-radius: 4px; min-width: 32px; height: 32px;
+            font-size: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black;
         }
-        .char-btn:hover {
-            background-color: #edf2f7;
-        }
+        .char-btn:hover { background-color: #edf2f7; }
 
-        /* Panel de color desplegable */
-        .custom-palette-box {
-            display: none;
-            background-color: #ffffff;
-            border-bottom: 2px solid var(--border-color);
-            padding: 15px;
-            color: #000000;
-        }
-
-        .palette-layout {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: space-between;
-        }
-
-        .target-selector {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            min-width: 130px;
-        }
-
-        .target-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background-color: #f7fafc;
-            border: 2px solid #cbd5e0;
-            border-radius: 6px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            color: #2d3748;
-            transition: all 0.15s;
-        }
-        .target-btn.active-target {
-            border-color: #3182ce;
-            background-color: #ebf8ff;
-            color: #2b6cb0;
-        }
-
-        .swatch-preview {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 1px solid #718096;
-        }
-
-        .palette-grid-container {
-            flex-grow: 1;
-            max-width: 320px;
-        }
-
-        .grid-title {
-            font-size: 12px;
-            font-weight: bold;
-            color: #4a5568;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .palette-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-        }
-
-        .palette-swatch {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: 1px solid #cbd5e0;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        .palette-swatch:hover {
-            transform: scale(1.2);
-        }
+        /* Panel de color */
+        .custom-palette-box { display: none; background-color: #ffffff; border-bottom: 2px solid var(--border-color); padding: 15px; color: #000000; }
+        .palette-layout { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; }
+        .target-selector { display: flex; flex-direction: column; gap: 6px; min-width: 130px; }
+        .target-btn { display: flex; align-items: center; gap: 8px; background-color: #f7fafc; border: 2px solid #cbd5e0; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 13px; font-weight: bold; color: #2d3748; }
+        .target-btn.active-target { border-color: #3182ce; background-color: #ebf8ff; color: #2b6cb0; }
+        .swatch-preview { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #718096; }
+        .palette-grid-container { flex-grow: 1; max-width: 320px; }
+        .grid-title { font-size: 12px; font-weight: bold; color: #4a5568; margin-bottom: 8px; text-transform: uppercase; }
+        .palette-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .palette-swatch { width: 26px; height: 26px; border-radius: 50%; border: 1px solid #cbd5e0; cursor: pointer; transition: transform 0.1s; }
+        .palette-swatch:hover { transform: scale(1.2); }
 
         /* Controles HSLA */
-        .rva-panel {
-            background-color: #f7fafc;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            padding: 12px;
-            min-width: 270px;
-            flex-grow: 1;
-        }
+        .rva-panel { background-color: #f7fafc; border: 1px solid #cbd5e0; border-radius: 6px; padding: 12px; min-width: 270px; flex-grow: 1; }
+        .rva-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .rva-row:last-child { margin-bottom: 0; }
+        .rva-label { font-weight: bold; font-size: 13px; width: 85px; color: #4a5568; }
+        .rva-slider { flex-grow: 1; cursor: pointer; }
+        .rva-value-display { width: 45px; text-align: right; font-size: 12px; font-weight: bold; color: #2d3748; }
 
-        .rva-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .rva-row:last-child {
-            margin-bottom: 0;
-        }
+        /* Barra de herramientas Exportar/Importar */
+        .toolbar-export { display: none; background-color: #edf2f7; border-bottom: 2px solid var(--border-color); padding: 15px; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-        .rva-label {
-            font-weight: bold;
-            font-size: 13px;
-            width: 85px;
-            color: #4a5568;
+        /* ESTRUCTURA METADATOS */
+        .metadata-block { display: flex; flex-direction: column; border-bottom: none; background-color: transparent; }
+        .meta-row { display: flex; border-bottom: 1px solid var(--border-color); align-items: stretch; }
+        .meta-label {
+            width: 110px; flex-shrink: 0; background-color: var(--table-header-color); padding: 6px 10px;
+            font-weight: bold; border-right: 1px solid var(--border-color); display: flex; align-items: center; color: var(--text-color);
         }
-
-        .rva-slider {
-            flex-grow: 1;
-            cursor: pointer;
-        }
-
-        .rva-value-display {
-            width: 45px;
-            text-align: right;
-            font-size: 12px;
-            font-weight: bold;
-            color: #2d3748;
-        }
-
-        /* Barra de herramientas para exportar */
-        .toolbar {
-            background-color: rgba(0, 0, 0, 0.05);
-            border-bottom: 2px solid var(--border-color);
-            padding: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-        }
-
-        /* Tabla principal de versos */
-        .sheet-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: transparent;
-        }
-
-        .sheet-table td, .sheet-table th {
-            border: 1px solid var(--border-color);
-            padding: 6px 10px;
-            font-size: 16px;
-            color: var(--text-color);
-        }
-
-        .header-label {
-            font-weight: bold;
-            width: 120px;
-            text-align: left;
-            background-color: var(--table-header-color);
-        }
-
+        .meta-input-container { flex-grow: 1; display: flex; align-items: center; padding: 4px 8px; }
         .header-input {
-            width: 100%;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            font-family: var(--font-main);
-            outline: none;
-            box-sizing: border-box;
-            color: var(--input-text-color);
+            width: 100%; border: none; background: transparent; font-size: 16px; font-family: var(--font-main);
+            outline: none; color: var(--input-text-color); font-weight: normal;
         }
 
-        #titulo {
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: #1a56db;
-            text-transform: uppercase;
-        }
+        /* LÍNEA SEPARADORA */
+        .table-divider { height: 8px; background-color: var(--table-header-color); border-bottom: 1px solid var(--border-color); }
 
-        /* Estilo de la tabla de versos */
-        .col-num {
-            width: 50px;
-            text-align: center;
-            font-weight: bold;
-            background-color: var(--table-header-color);
-        }
+        /* TABLA DE VERSOS (Totalmente libre para seleccionar y copiar) */
+        .sheet-table { width: 100%; border-collapse: collapse; background-color: transparent; table-layout: fixed; border-top: none; }
+        .sheet-table td, .sheet-table th { border: 1px solid var(--border-color); padding: 4px; font-size: 16px; color: var(--text-color); }
+        .col-num { width: 35px; text-align: center; font-weight: bold; background-color: var(--table-header-color); }
+        .col-words { width: 65px; text-align: center; font-weight: bold; background-color: var(--table-header-color); }
+        .col-verse-header { text-align: center; font-weight: bold; background-color: var(--table-header-color); }
 
-        .col-words {
-            width: 80px;
-            text-align: center;
-            font-weight: bold;
-            background-color: var(--table-header-color);
-        }
-
-        .col-verse th {
-            text-align: center;
-            background-color: var(--table-header-color);
-            font-weight: bold;
-        }
-
-        /* Caja de texto editable */
         .verse-input {
-            width: 100%;
-            min-height: 22px;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            font-family: var(--font-main);
-            outline: none;
-            padding: 2px 0;
-            box-sizing: border-box;
-            color: var(--input-text-color);
-            white-space: pre-wrap;
-            display: inline-block;
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
+            width: 100%; min-height: 24px; border: none; background: transparent; font-size: 16px;
+            font-family: var(--font-main); outline: none; padding: 2px 4px; box-sizing: border-box;
+            color: var(--input-text-color); white-space: pre-wrap; word-wrap: break-word;
         }
+        .verse-input:empty::before { content: "Escribe..."; color: #a0aec0; font-style: italic; }
+        .row-highlight td { background-color: var(--heart-row-color) !important; }
 
-        .verse-input:empty::before {
-            content: "Escribe...";
-            color: #a0aec0;
-            font-style: italic;
-        }
+        /* Modal Compartir */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background-color: white; color: black; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%; text-align: center; }
+        .modal-links { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .share-link { display: block; padding: 10px; background-color: #edf2f7; color: #2d3748; text-decoration: none; border-radius: 4px; font-weight: bold;}
 
-        /* Fila Corazón número 10 destacable y configurable */
-        .row-highlight td {
-            background-color: var(--heart-row-color) !important;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            justify-content: center; align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background-color: white;
-            color: black;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-        .modal-links {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 12px;
-        }
-        .share-link {
-            display: block;
-            padding: 10px;
-            background-color: #edf2f7;
-            color: #2d3748;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        /* Ocultar elementos al imprimir */
+        /* Impresión */
         @media print {
-            body {
-                background-color: white;
-                padding: 0;
-            }
-            .toolbar, .top-management, .tools-unified-row, .custom-palette-box, .status-banner, .modal {
-                display: none !important;
-            }
-            .container {
-                box-shadow: none;
-                border: 1px solid black;
-            }
+            body { background-color: white; padding: 0; }
+            .top-management, .tools-unified-row, .custom-palette-box, .toolbar-export, .status-banner, .modal { display: none !important; }
+            .container { box-shadow: none; border: 1px solid black; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- Banner Auto-guardado -->
-        <div class="status-banner">
-            <b>✅ Auto-guardado activado</b>
-            <span>Almacenamiento automático en este dispositivo.</span>
-        </div>
-
-        <!-- Panel de Gestión Superior (Compacto) -->
-        <div class="top-management">
-            <div class="panel-row">
-                <div class="group">
-                    <label for="profile-select">Perfil:</label>
-                    <select id="profile-select" class="select-custom" onchange="changeProfile(this.value)">
-                    </select>
-                    <button class="btn btn-blue" onclick="addNewProfile()">+ Nuevo Perfil</button>
-                    <button class="btn btn-red" style="padding: 4px 8px;" onclick="deleteProfile()">Eliminar</button>
-                </div>
-                <div class="group">
-                    <label for="poem-select">Poema:</label>
-                    <select id="poem-select" class="select-custom" onchange="loadPoem(this.value)">
-                    </select>
-                    <button class="btn btn-green" onclick="createNewPoem()">➕ Nuevo Poema</button>
-                    <button class="btn btn-red" style="padding: 4px 8px;" onclick="deleteCurrentPoem()">🗑️ Borrar</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- FILA UNIFICADA DE HERRAMIENTAS -->
-        <div class="tools-unified-row">
-            <!-- Izquierda: Caracteres Especiales -->
-            <div class="tools-section">
-                <span class="tools-title">Caracteres:</span>
-                <div class="char-group">
-                    <button class="char-btn" onclick="insertChar('«')" title="Comilla angular izquierda">«</button>
-                    <button class="char-btn" onclick="insertChar('»')" title="Comilla angular derecha">»</button>
-                    <button class="char-btn" onclick="insertChar('“')" title="Comilla doble abierta">“</button>
-                    <button class="char-btn" onclick="insertChar('”')" title="Comilla doble cerrada">”</button>
-                    <button class="char-btn" onclick="insertChar('—')" title="Guión largo / Raya">—</button>
-                    <button class="char-btn" onclick="insertChar('–')" title="Guión medio">–</button>
-                    <button class="char-btn" onclick="insertChar('…')" title="Puntos suspensivos">…</button>
-                </div>
-            </div>
-
-            <!-- Derecha: Selector de Temas Rápidos -->
-            <div class="tools-section">
-                <span class="tools-title">Aspecto:</span>
-                <select id="theme-select" class="select-custom" onchange="setTheme(this.value)">
-                    <option value="dia">☀️ Día (Crema)</option>
-                    <option value="nocturno">🌙 Noche</option>
-                    <option value="sepia">📜 Sepia</option>
-                    <option value="verdedelvalle">🌿 Valle Verde</option>
-                    <option value="atardecer">🌅 Atardecer</option>
-                    <option value="personalizado">🎨 Personalizado...</option>
-                </select>
-                <button id="toggle-picker-btn" class="btn btn-blue" style="display: none;" onclick="toggleAdvancedColorPicker()">🎨 Editar Color</button>
-            </div>
-        </div>
-
-        <!-- PANEL DE COLOR DESPLEGABLE -->
-        <div class="custom-palette-box" id="custom-palette-container">
-            <div class="palette-layout">
-                <!-- 1. Elemento a Pintar -->
-                <div class="target-selector">
-                    <span class="grid-title">Elemento:</span>
-                    <button id="target-bg" class="target-btn active-target" onclick="selectColorTarget('bg')">
-                        <span class="swatch-preview" id="swatch-preview-bg"></span> Fondo
-                    </button>
-                    <button id="target-border" class="target-btn" onclick="selectColorTarget('border')">
-                        <span class="swatch-preview" id="swatch-preview-border"></span> Bordes
-                    </button>
-                    <button id="target-header" class="target-btn" onclick="selectColorTarget('header')">
-                        <span class="swatch-preview" id="swatch-preview-header"></span> Cabeceras
-                    </button>
-                    <button id="target-heartRow" class="target-btn" onclick="selectColorTarget('heartRow')">
-                        <span class="swatch-preview" id="swatch-preview-heartRow"></span> Fila 10
-                    </button>
-                    <button id="target-text" class="target-btn" onclick="selectColorTarget('text')">
-                        <span class="swatch-preview" id="swatch-preview-text"></span> Texto
-                    </button>
-                </div>
-
-                <!-- 2. Gemas Rápidas (Hexágonos) -->
-                <div class="palette-grid-container">
-                    <div class="grid-title">Gemas rápidas:</div>
-                    <div class="palette-grid" id="palette-grid-swatches">
-                    </div>
-                </div>
-
-                <!-- 3. Controles HSLA -->
-                <div class="rva-panel">
-                    <div class="grid-title">Control de Tono, Brillo y Opacidad:</div>
-                    <div class="rva-row">
-                        <span class="rva-label">Color (Tono):</span>
-                        <input type="range" id="slide-h" class="rva-slider" min="0" max="360" oninput="updateFromSliders()">
-                        <span id="val-h" class="rva-value-display">0°</span>
-                    </div>
-                    <div class="rva-row">
-                        <span class="rva-label">Saturación:</span>
-                        <input type="range" id="slide-s" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
-                        <span id="val-s" class="rva-value-display">100%</span>
-                    </div>
-                    <div class="rva-row">
-                        <span class="rva-label" style="font-weight: bold;">💡 Brillo:</span>
-                        <input type="range" id="slide-l" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
-                        <span id="val-l" class="rva-value-display">50%</span>
-                    </div>
-                    <div class="rva-row">
-                        <span class="rva-label" style="font-weight: bold;">🏁 Opacidad:</span>
-                        <input type="range" id="slide-a" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
-                        <span id="val-a" class="rva-value-display">100%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Barra de herramientas (Exportar) -->
-        <div class="toolbar">
-            <button class="btn btn-green" onclick="copyColumnsToClipboard()" title="Copia los versos y métricas formateados en columnas para pegar directo en LibreOffice Calc">📋 Copiar Versos + Métrica</button>
-            <button class="btn" style="background-color: #2b6cb0;" onclick="document.getElementById('txt-import-file').click()">Importar .TXT</button>
-            <input type="file" id="txt-import-file" style="display: none;" accept=".txt" onchange="importTXT(event)">
-            <button class="btn" onclick="exportTXT()">Exportar TXT</button>
-            <button class="btn" onclick="exportXLS()">Excel (XLS)</button>
-            <button class="btn" onclick="exportDOCX()">Word (DOC)</button>
-            <button class="btn" onclick="exportPDF()">Imprimir / PDF</button>
-            <button class="btn btn-blue" onclick="shareContent()">Compartir</button>
-            <button class="btn" style="background-color: #5a67d8;" onclick="exportBackup()">Exportar Copia</button>
-            <button class="btn" style="background-color: #5a67d8;" onclick="document.getElementById('import-file').click()">Restaurar Copia</button>
-            <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importBackup(event)">
-        </div>
-
-        <!-- Tabla de Escritura -->
-        <table class="sheet-table">
-            <tr class="no-select">
-                <td class="header-label">Título</td>
-                <td colspan="2">
-                    <input type="text" id="titulo" class="header-input" value="EL VIAJE" oninput="saveCurrentState()">
-                </td>
-            </tr>
-            <tr class="no-select">
-                <td class="header-label">Subtítulo</td>
-                <td colspan="2">
-                    <input type="text" id="subtitulo" class="header-input" placeholder="Escriba el subtítulo aquí..." oninput="saveCurrentState()">
-                </td>
-            </tr>
-            <tr class="no-select">
-                <td class="header-label">Autor</td>
-                <td colspan="2">
-                    <input type="text" id="autor" class="header-input" placeholder="Nombre del autor..." oninput="saveCurrentState()">
-                </td>
-            </tr>
-            <tr class="no-select">
-                <td class="header-label">Fecha</td>
-                <td colspan="2">
-                    <input type="text" id="fecha" class="header-input" oninput="saveCurrentState()">
-                </td>
-            </tr>
-            <tr class="no-select">
-                <td class="header-label">#</td>
-                <td colspan="2">
-                    <input type="text" id="numero_poema" class="header-input" value="005" onblur="formatPoemNumber(this)" oninput="saveCurrentState()">
-                </td>
-            </tr>
-            <tr style="height: 12px; background-color: var(--table-header-color);" class="no-select">
-                <td colspan="3"></td>
-            </tr>
-            <tr style="font-weight: bold; text-align: center;">
-                <th class="col-num">N.º</th>
-                <th>Verso</th>
-                <th class="col-words">Palabras</th>
-            </tr>
-            <tbody id="verses-body">
-            </tbody>
-        </table>
+<div class="container">
+    <div class="status-banner" id="status-banner">
+        <b>✅ Auto-guardado activado</b>
+        <span>Guardado local en este dispositivo.</span>
     </div>
 
-    <!-- Modal para compartir -->
-    <div id="shareModal" class="modal" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h3>Compartir Poema</h3>
-            <p>Selecciona la vía para enviar el poema actual:</p>
-            <div class="modal-links">
-                <a id="shareEmail" href="#" target="_blank" class="share-link">📧 Correo Electrónico</a>
-                <a id="shareTelegram" href="#" target="_blank" class="share-link">✈️ Telegram Directo</a>
-                <a id="shareWhatsApp" href="#" target="_blank" class="share-link">💬 WhatsApp</a>
-                <button class="btn" style="margin-top: 10px; background-color: #e53e3e;" onclick="document.getElementById('shareModal').style.display='none'">Cerrar</button>
+    <div class="top-management">
+        <div class="panel-row">
+            <div class="group">
+                <label for="profile-select">Perfil:</label>
+                <select id="profile-select" class="select-custom" onchange="changeProfile(this.value)"></select>
+                <button class="btn btn-blue" onclick="addNewProfile()">+ Nuevo Perfil</button>
+            </div>
+            <div class="group">
+                <label for="poem-select">Poema:</label>
+                <select id="poem-select" class="select-custom" onchange="loadPoem(this.value)"></select>
+                <button class="btn btn-green" onclick="createNewPoem()">➕ Nuevo</button>
+                <button class="btn btn-red" onclick="deleteCurrentPoem()">🗑️ Borrar</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Base de datos local unificada en HSLA (Estructura de almacenamiento estable)
-        let db = {
-            profiles: {
-                "Ramón Luís Cabellos": {
-                    autorDefault: "Ramón Luís Cabellos Bringas",
-                    poems: {}
-                }
-            },
-            activeProfile: "Ramón Luís Cabellos",
-            activePoemId: null,
-            theme: "dia",
-            customColors: {
-                bg: { h: 50, s: 76, l: 91, a: 1.0 },
-                border: { h: 0, s: 0, l: 63, a: 1.0 },
-                header: { h: 50, s: 68, l: 84, a: 1.0 },
-                text: { h: 0, s: 0, l: 0, a: 1.0 },
-                heartRow: { h: 240, s: 30, l: 80, a: 0.8 }
-            }
-        };
+    <div class="tools-unified-row">
+        <div class="tools-section">
+            <span class="tools-title">Caracteres:</span>
+            <div class="char-group">
+                <button class="char-btn" onclick="insertChar('«')">«</button>
+                <button class="char-btn" onclick="insertChar('»')">»</button>
+                <button class="char-btn" onclick="insertChar('“')">“</button>
+                <button class="char-btn" onclick="insertChar('”')">”</button>
+                <button class="char-btn" onclick="insertChar('—')">—</button>
+                <button class="char-btn" onclick="insertChar('…')">…</button>
+            </div>
+        </div>
+        
+        <div class="tools-section">
+            <span class="tools-title">Aspecto:</span>
+            <select id="theme-select" class="select-custom" onchange="setTheme(this.value)">
+                <option value="dia">☀️ Día (Crema)</option>
+                <option value="nocturno">🌙 Noche</option>
+                <option value="sepia">📜 Sepia</option>
+                <option value="verdedelvalle">🌿 Valle Verde</option>
+                <option value="atardecer">🌅 Atardecer</option>
+                <option value="personalizado">🎨 Personalizado...</option>
+            </select>
+            <button id="toggle-picker-btn" class="btn btn-blue" style="display: none;" onclick="toggleAdvancedColorPicker()">🎨 Editar Color</button>
+            <button id="toggle-export-btn" class="btn btn-purple" onclick="toggleExportMenu()">🛠️ Exportar / Importar</button>
+        </div>
+    </div>
 
-        let lastFocusedInput = null;
-        let activeColorTarget = 'bg';
+    <div class="custom-palette-box" id="custom-palette-container">
+        <div class="palette-layout">
+            <div class="target-selector">
+                <span class="grid-title">Elemento:</span>
+                <button id="target-bg" class="target-btn active-target" onclick="selectColorTarget('bg')"><span class="swatch-preview" id="swatch-preview-bg"></span> Fondo</button>
+                <button id="target-border" class="target-btn" onclick="selectColorTarget('border')"><span class="swatch-preview" id="swatch-preview-border"></span> Bordes</button>
+                <button id="target-header" class="target-btn" onclick="selectColorTarget('header')"><span class="swatch-preview" id="swatch-preview-header"></span> Cabeceras</button>
+                <button id="target-heartRow" class="target-btn" onclick="selectColorTarget('heartRow')"><span class="swatch-preview" id="swatch-preview-heartRow"></span> Fila 10</button>
+                <button id="target-text" class="target-btn" onclick="selectColorTarget('text')"><span class="swatch-preview" id="swatch-preview-text"></span> Texto</button>
+            </div>
+            <div class="palette-grid-container">
+                <div class="grid-title">Gemas rápidas:</div>
+                <div class="palette-grid" id="palette-grid-swatches"></div>
+            </div>
+            <div class="rva-panel">
+                <div class="grid-title">Control de Tono, Brillo y Opacidad:</div>
+                <div class="rva-row"><span class="rva-label">Color:</span><input type="range" id="slide-h" class="rva-slider" min="0" max="360" oninput="updateFromSliders()"><span id="val-h" class="rva-value-display">0°</span></div>
+                <div class="rva-row"><span class="rva-label">Saturación:</span><input type="range" id="slide-s" class="rva-slider" min="0" max="100" oninput="updateFromSliders()"><span id="val-s" class="rva-value-display">100%</span></div>
+                <div class="rva-row"><span class="rva-label">💡 Brillo:</span><input type="range" id="slide-l" class="rva-slider" min="0" max="100" oninput="updateFromSliders()"><span id="val-l" class="rva-value-display">50%</span></div>
+                <div class="rva-row"><span class="rva-label">🏁 Opacidad:</span><input type="range" id="slide-a" class="rva-slider" min="0" max="100" oninput="updateFromSliders()"><span id="val-a" class="rva-value-display">100%</span></div>
+            </div>
+        </div>
+    </div>
 
-        const customPaletteSwatches = [
-            '#ff0000', '#ff5a5a', '#ff9e9e', '#ffd2d2', '#ffe6e6', '#ffffff', '#000000',
-            '#ff6600', '#ff9933', '#ffcc66', '#ffff00', '#ffff99', '#fffdeb', '#333333',
-            '#00cc00', '#33ff33', '#66ff66', '#99ff99', '#ccffcc', '#f0fbf0', '#666666',
-            '#00cccc', '#33ffff', '#66ffff', '#0066cc', '#3399ff', '#99ccff', '#999999',
-            '#0000cc', '#3333ff', '#9999ff', '#6600cc', '#9933ff', '#cc99ff', '#cccccc',
-            '#cc00cc', '#ff33ff', '#ff99ff', '#ffccff', '#fff0ff', '#fbf5d6', '#f4ecd8'
-        ];
+    <div class="toolbar-export" id="export-container">
+        <button class="btn btn-green" onclick="copyVersesAndMetrics()">📋 Copiar Texto Formatado</button>
+        <button class="btn btn-blue" onclick="shareContent()">✉️ Compartir</button>
+        <button class="btn btn-purple" onclick="exportDOCX()">📄 Word / ODT</button>
+        <button class="btn btn-purple" onclick="exportXLS()">📊 Excel / ODS</button>
+        <button class="btn btn-purple" onclick="exportTXT()">📝 Exportar TXT</button>
+        <button class="btn btn-purple" onclick="window.print()">🖨️ Imprimir / PDF</button>
+        <button class="btn" style="background-color: #2b6cb0;" onclick="document.getElementById('txt-import-file').click()">📂 Importar TXT</button>
+        <input type="file" id="txt-import-file" style="display: none;" accept=".txt" onchange="importTXT(event)">
+        <button class="btn" style="background-color: #5a67d8;" onclick="exportBackup()">💾 Guardar Backup App</button>
+        <button class="btn" style="background-color: #5a67d8;" onclick="document.getElementById('import-file').click()">📂 Restaurar Backup App</button>
+        <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importBackup(event)">
+    </div>
 
-        const themes = {
-            dia: {
-                bg: { h: 50, s: 76, l: 91, a: 1.0 },
-                border: { h: 0, s: 0, l: 63, a: 1.0 },
-                header: { h: 50, s: 68, l: 84, a: 1.0 },
-                text: { h: 0, s: 0, l: 0, a: 1.0 },
-                heartRow: { h: 240, s: 30, l: 80, a: 0.8 }
-            },
-            nocturno: {
-                bg: { h: 210, s: 11, l: 15, a: 1.0 },
-                border: { h: 210, s: 9, l: 31, a: 1.0 },
-                header: { h: 210, s: 10, l: 23, a: 1.0 },
-                text: { h: 210, s: 17, l: 98, a: 1.0 },
-                heartRow: { h: 240, s: 20, l: 30, a: 0.8 }
-            },
-            sepia: {
-                bg: { h: 42, s: 47, l: 91, a: 1.0 },
-                border: { h: 36, s: 29, l: 67, a: 1.0 },
-                header: { h: 40, s: 44, l: 80, a: 1.0 },
-                text: { h: 32, s: 30, l: 20, a: 1.0 },
-                heartRow: { h: 240, s: 15, l: 75, a: 0.8 }
-            },
-            verdedelvalle: {
-                bg: { h: 120, s: 16, l: 93, a: 1.0 },
-                border: { h: 131, s: 18, l: 57, a: 1.0 },
-                header: { h: 127, s: 19, l: 84, a: 1.0 },
-                text: { h: 129, s: 30, l: 17, a: 1.0 },
-                heartRow: { h: 120, s: 25, l: 75, a: 0.8 }
-            },
-            atardecer: {
-                bg: { h: 0, s: 47, l: 96, a: 1.0 },
-                border: { h: 0, s: 42, l: 74, a: 1.0 },
-                header: { h: 0, s: 35, l: 87, a: 1.0 },
-                text: { h: 0, s: 37, l: 24, a: 1.0 },
-                heartRow: { h: 0, s: 30, l: 80, a: 0.8 }
-            }
-        };
+    <!-- BLOQUE METADATOS -->
+    <div class="metadata-block">
+        <div class="meta-row">
+            <div class="meta-label">Título</div>
+            <div class="meta-input-container"><input type="text" id="titulo" class="header-input" placeholder="Título..." oninput="saveCurrentState()"></div>
+        </div>
+        <div class="meta-row">
+            <div class="meta-label">Subtítulo</div>
+            <div class="meta-input-container"><input type="text" id="subtitulo" class="header-input" placeholder="Subtítulo..." oninput="saveCurrentState()"></div>
+        </div>
+        <div class="meta-row">
+            <div class="meta-label">Autor</div>
+            <div class="meta-input-container"><input type="text" id="autor" class="header-input" placeholder="Autor..." oninput="saveCurrentState()"></div>
+        </div>
+        <div class="meta-row">
+            <div class="meta-label">Fecha</div>
+            <div class="meta-input-container"><input type="text" id="fecha" class="header-input" oninput="saveCurrentState()"></div>
+        </div>
+        <div class="meta-row" style="border-bottom: none;">
+            <div class="meta-label">Poema</div>
+            <div class="meta-input-container"><input type="text" id="numero_poema" class="header-input" placeholder="Ej: 005" onblur="formatPoemNumber(this)" oninput="saveCurrentState()"></div>
+        </div>
+    </div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initDatabase();
-            buildVersesTable();
-            buildColorSwatches();
-            loadActiveProfile();
-            setupFocusTracking();
-        });
+    <div class="table-divider"></div>
 
-        function initDatabase() {
-            const savedDb = localStorage.getItem('poemas_v3_stable');
-            if (savedDb) {
-                try { db = JSON.parse(savedDb); } catch (e) { console.error("Error cargando base de datos estable."); }
-            }
-            if (Object.keys(db.profiles).length === 0) {
-                db.profiles["Ramón Luís Cabellos"] = {
-                    autorDefault: "Ramón Luís Cabellos Bringas",
-                    poems: {}
-                };
-                db.activeProfile = "Ramón Luís Cabellos";
-            }
-            saveToLocalStorage();
+    <!-- TABLA DE VERSOS EXACTAMENTE 19 FILAS -->
+    <table class="sheet-table">
+        <colgroup>
+            <col class="col-num">
+            <col>
+            <col class="col-words">
+        </colgroup>
+        <tr style="font-weight: bold;">
+            <td class="col-num" style="border-top: none;">N.º</td>
+            <td class="col-verse-header" style="border-top: none;">Verso</td>
+            <td class="col-words" style="border-top: none;">Palabras</td>
+        </tr>
+        <tbody id="verses-body">
+            <!-- 19 Filas desde JS -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Compartir -->
+<div id="shareModal" class="modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3>Compartir Poema</h3>
+        <p>Selecciona la vía para enviar el poema actual:</p>
+        <div class="modal-links">
+            <a id="shareEmail" href="#" class="share-link">📧 Correo Electrónico</a>
+            <a id="shareTelegram" href="#" class="share-link">✈️ Telegram (App de Escritorio)</a>
+            <a id="shareWhatsApp" href="#" class="share-link">💬 WhatsApp (App de Escritorio)</a>
+            <a id="shareWhatsAppWeb" href="#" target="_blank" class="share-link">🌐 WhatsApp (Navegador Web)</a>
+            <button class="btn btn-red" style="margin-top: 10px;" onclick="closeModal()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let db = {
+        profiles: { "Autor Principal": { autorDefault: "Autor Principal", poems: {} } },
+        activeProfile: "Autor Principal", activePoemId: null, theme: "dia",
+        customColors: { bg: {h:50,s:76,l:91,a:1}, border: {h:0,s:0,l:63,a:1}, header: {h:50,s:68,l:84,a:1}, text: {h:0,s:0,l:0,a:1}, heartRow: {h:240,s:30,l:80,a:0.8} }
+    };
+    let lastFocusedInput = null; let activeColorTarget = 'bg';
+
+    const customPaletteSwatches = ['#ff0000', '#ff5a5a', '#ff9e9e', '#ffd2d2', '#ffe6e6', '#ffffff', '#000000', '#ff6600', '#ff9933', '#ffcc66', '#ffff00', '#ffff99', '#fffdeb', '#333333', '#00cc00', '#33ff33', '#66ff66', '#99ff99', '#ccffcc', '#f0fbf0', '#666666', '#00cccc', '#33ffff', '#66ffff', '#0066cc', '#3399ff', '#99ccff', '#999999', '#0000cc', '#3333ff', '#9999ff', '#6600cc', '#9933ff', '#cc99ff', '#cccccc', '#cc00cc', '#ff33ff', '#ff99ff', '#ffccff', '#fff0ff', '#fbf5d6', '#f4ecd8'];
+    const themes = {
+        dia: { bg:{h:50,s:76,l:91,a:1}, border:{h:0,s:0,l:63,a:1}, header:{h:50,s:68,l:84,a:1}, text:{h:0,s:0,l:0,a:1}, heartRow:{h:240,s:30,l:80,a:0.8} },
+        nocturno: { bg:{h:210,s:11,l:15,a:1}, border:{h:210,s:9,l:31,a:1}, header:{h:210,s:10,l:23,a:1}, text:{h:210,s:17,l:98,a:1}, heartRow:{h:240,s:20,l:30,a:0.8} },
+        sepia: { bg:{h:42,s:47,l:91,a:1}, border:{h:36,s:29,l:67,a:1}, header:{h:40,s:44,l:80,a:1}, text:{h:32,s:30,l:20,a:1}, heartRow:{h:240,s:15,l:75,a:0.8} },
+        verdedelvalle: { bg:{h:120,s:16,l:93,a:1}, border:{h:131,s:18,l:57,a:1}, header:{h:127,s:19,l:84,a:1}, text:{h:129,s:30,l:17,a:1}, heartRow:{h:120,s:25,l:75,a:0.8} },
+        atardecer: { bg:{h:0,s:47,l:96,a:1}, border:{h:0,s:42,l:74,a:1}, header:{h:0,s:35,l:87,a:1}, text:{h:0,s:37,l:24,a:1}, heartRow:{h:0,s:30,l:80,a:0.8} }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+        initDatabase(); buildVersesTable(); buildColorSwatches(); loadActiveProfile(); setupFocusTracking();
+    });
+
+    function initDatabase() {
+        const savedDb = localStorage.getItem('poemas_v7_stable');
+        if (savedDb) { try { db = JSON.parse(savedDb); } catch(e){} }
+        if (Object.keys(db.profiles).length === 0) { db.profiles["Autor Principal"] = { autorDefault: "Autor Principal", poems: {} }; db.activeProfile = "Autor Principal"; }
+        if(!db.theme) db.theme = "dia"; if(!db.customColors) db.customColors = themes.dia;
+    }
+
+    function saveToLocalStorage() { localStorage.setItem('poemas_v7_stable', JSON.stringify(db)); }
+
+    function buildVersesTable() {
+        const tbody = document.getElementById('verses-body'); tbody.innerHTML = '';
+        // BUCLE ESTRICTO DE 19 FILAS
+        for (let i = 1; i <= 19; i++) {
+            const tr = document.createElement('tr'); tr.className = 'verse-row';
+            if (i === 10) tr.classList.add('row-highlight');
+            const colNum = document.createElement('td'); colNum.className = 'col-num'; colNum.innerText = i;
+            const colVerse = document.createElement('td');
+            const div = document.createElement('div');
+            div.contentEditable = "true"; div.className = 'verse-input'; div.setAttribute('data-index', i - 1);
+            div.addEventListener('input', function() { updateWordCount(this); saveCurrentState(); });
+            div.addEventListener('paste', handleSmartPaste);
+            colVerse.appendChild(div);
+            const colWords = document.createElement('td'); colWords.className = 'col-words'; colWords.innerText = '0';
+            tr.appendChild(colNum); tr.appendChild(colVerse); tr.appendChild(colWords); tbody.appendChild(tr);
         }
+    }
 
-        function buildVersesTable() {
-            const tbody = document.getElementById('verses-body');
-            tbody.innerHTML = '';
-            for (let i = 1; i <= 19; i++) {
-                const tr = document.createElement('tr');
-                tr.className = 'verse-row';
-                if (i === 10) tr.classList.add('row-highlight');
-                
-                // Columna N.°
-                const colNum = document.createElement('td');
-                colNum.className = 'col-num';
-                colNum.innerText = i;
-                
-                // Columna Verso (Caja editable)
-                const colVerse = document.createElement('td');
-                const div = document.createElement('div');
-                div.contentEditable = "true";
-                div.className = 'verse-input';
-                div.setAttribute('data-index', i - 1);
-                div.addEventListener('input', function() {
-                    updateWordCount(this);
-                    saveCurrentState();
-                });
-                div.addEventListener('paste', handleSmartPaste); // PEGADO INTELIGENTE
-                colVerse.appendChild(div);
-                
-                // Columna Palabras
-                const colWords = document.createElement('td');
-                colWords.className = 'col-words';
-                colWords.innerText = '0';
-                
-                tr.appendChild(colNum);
-                tr.appendChild(colVerse);
-                tr.appendChild(colWords);
-                tbody.appendChild(tr);
-            }
-        }
+    function updateWordCount(input) {
+        const text = input.innerText.trim();
+        input.closest('tr').querySelector('.col-words').innerText = text ? text.split(/[\s\n]+/).filter(w => w.length > 0).length : 0;
+    }
 
-        // CONTROL DE PEGADO INTELIGENTE (Procesa columnas de LibreOffice Calc y saltos de línea)
-        function handleSmartPaste(e) {
-            e.preventDefault();
-            const clipboardData = e.clipboardData || window.clipboardData;
-            const pastedText = clipboardData.getData('text/plain');
-            
-            // Separar el texto pegado por saltos de línea
-            const lines = pastedText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== "");
-            
-            if (lines.length > 1) {
-                const startIndex = parseInt(this.getAttribute('data-index'));
-                const inputs = document.querySelectorAll('.verse-input');
-                
-                lines.forEach((line, offset) => {
-                    const targetIndex = startIndex + offset;
-                    if (targetIndex < inputs.length) {
-                        // Si se copia una tabla, Calc separa columnas con tabuladores. Tomamos solo la primera columna (el verso)
-                        const cleanLine = line.split('\t')[0]; 
-                        inputs[targetIndex].innerText = cleanLine;
-                        updateWordCount(inputs[targetIndex]);
-                    }
-                });
-                saveCurrentState();
-            } else {
-                // Pegado normal de una sola línea limpiando estilos complejos
-                const text = pastedText;
-                document.execCommand('insertText', false, text);
-                updateWordCount(this);
-                saveCurrentState();
-            }
-        }
+    function formatPoemNumber(input) { let val = input.value.trim(); if (val !== "" && !isNaN(val)) { input.value = String(val).padStart(3, '0'); saveCurrentState(); } }
 
-        function buildColorSwatches() {
-            const container = document.getElementById('palette-grid-swatches');
-            container.innerHTML = '';
-            customPaletteSwatches.forEach(hex => {
-                const swatch = document.createElement('div');
-                swatch.className = 'palette-swatch';
-                swatch.style.backgroundColor = hex;
-                swatch.onclick = () => selectSwatchColor(hex);
-                container.appendChild(swatch);
+    function handleSmartPaste(e) {
+        e.preventDefault(); const clipboardData = e.clipboardData || window.clipboardData;
+        const pastedText = clipboardData.getData('text/plain'); const lines = pastedText.split(/\r?\n/).map(l => l.trim()).filter(l => l !== "");
+        if (lines.length > 1) {
+            const startIndex = parseInt(this.getAttribute('data-index')); const inputs = document.querySelectorAll('.verse-input');
+            lines.forEach((line, offset) => {
+                const targetIndex = startIndex + offset;
+                if (targetIndex < inputs.length) { inputs[targetIndex].innerText = line.replace(/\s\(\d+\)$/, '').split('\t')[0]; updateWordCount(inputs[targetIndex]); }
             });
-        }
-
-        function setupFocusTracking() {
-            document.addEventListener('focusin', (e) => {
-                if (e.target.tagName === 'INPUT' || e.target.classList.contains('verse-input')) { 
-                    lastFocusedInput = e.target; 
-                }
-            });
-        }
-
-        function insertChar(char) {
-            if (!lastFocusedInput) {
-                alert("Haz clic primero en la línea de texto donde deseas insertar el carácter.");
-                return;
-            }
-            const input = lastFocusedInput;
-
-            if (input.classList.contains('verse-input')) {
-                const selection = window.getSelection();
-                if (selection.rangeCount > 0) {
-                    const range = selection.getRangeAt(0);
-                    range.deleteContents();
-                    const textNode = document.createTextNode(char);
-                    range.insertNode(textNode);
-                    range.setStartAfter(textNode);
-                    range.setEndAfter(textNode);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                } else {
-                    input.innerText += char;
-                }
-                updateWordCount(input);
-            } else {
-                const start = input.selectionStart || 0;
-                const end = input.selectionEnd || 0;
-                const text = input.value;
-                input.value = text.substring(0, start) + char + text.substring(end);
-                const newCursorPos = start + char.length;
-                input.focus();
-                input.setSelectionRange(newCursorPos, newCursorPos);
-            }
             saveCurrentState();
+        } else { document.execCommand('insertText', false, pastedText); updateWordCount(this); saveCurrentState(); }
+    }
+
+    function setupFocusTracking() { document.addEventListener('focusin', (e) => { if (e.target.tagName === 'INPUT' || e.target.classList.contains('verse-input')) lastFocusedInput = e.target; }); }
+
+    function insertChar(char) {
+        if (!lastFocusedInput) return; const input = lastFocusedInput;
+        if (input.classList.contains('verse-input')) {
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0); range.deleteContents(); const node = document.createTextNode(char);
+                range.insertNode(node); range.setStartAfter(node); sel.removeAllRanges(); sel.addRange(range);
+            } else input.innerText += char;
+            updateWordCount(input);
+        } else {
+            const start = input.selectionStart || 0; input.value = input.value.substring(0, start) + char + input.value.substring(input.selectionEnd);
+            input.focus(); input.setSelectionRange(start + char.length, start + char.length);
         }
+        saveCurrentState();
+    }
 
-        function loadActiveProfile() {
-            updateProfileDropdown();
-            setTheme(db.theme || 'dia');
+    function loadActiveProfile() {
+        updateProfileDropdown(); document.getElementById('theme-select').value = db.theme || 'dia'; setTheme(db.theme || 'dia');
+        const profile = db.profiles[db.activeProfile]; if (Object.keys(profile.poems).length === 0) createNewPoem();
+        if (!db.activePoemId || !profile.poems[db.activePoemId]) db.activePoemId = Object.keys(profile.poems)[0];
+        updatePoemDropdown(); loadPoemData();
+    }
 
-            const profile = db.profiles[db.activeProfile];
-            if (Object.keys(profile.poems).length === 0) { createInitialPoemForProfile(profile); }
-            if (!db.activePoemId || !profile.poems[db.activePoemId]) { db.activePoemId = Object.keys(profile.poems)[0]; }
+    function updateProfileDropdown() {
+        const select = document.getElementById('profile-select'); select.innerHTML = '';
+        Object.keys(db.profiles).forEach(pName => { const opt = document.createElement('option'); opt.value = pName; opt.textContent = pName; select.appendChild(opt); });
+        select.value = db.activeProfile;
+    }
 
-            updatePoemDropdown();
-            loadPoemData();
-        }
+    function updatePoemDropdown() {
+        const select = document.getElementById('poem-select'); select.innerHTML = '';
+        Object.values(db.profiles[db.activeProfile].poems).forEach(poem => {
+            const opt = document.createElement('option'); opt.value = poem.id;
+            opt.textContent = `#${poem.numero || '000'} - ${poem.titulo || 'Sin título'}`; select.appendChild(opt);
+        });
+        select.value = db.activePoemId;
+    }
 
-        // PRECARGA EXACTA DE SU POEMA "EL VIAJE" (Con su autoría, fecha, número y estructura)
-        function createInitialPoemForProfile(profile) {
-            const id = 'poem_' + Date.now();
-            profile.poems[id] = {
-                id: id,
-                titulo: "EL VIAJE",
-                subtitulo: "",
-                autor: "Ramón Luís Cabellos Bringas",
-                fecha: "04 / 06 / 2026",
-                numero: "005",
-                versos: [
-                    "Viajé",
-                    "tan lejos",
-                    "admirando cada frontera,",
-                    "mas sus glorias efímeras",
-                    "quebraron y oscurecieron mis alegrías.",
-                    "Creí que escalaba una montaña dorada",
-                    "y mi diligencia se embriagó de nada.",
-                    "No sirvió medir kilómetros. Entonces tuve que desarmar",
-                    "el laberinto que construí para protegerme de mí mismo:",
-                    "Cerré los ojos... ¡el universo se desplegó tras mis párpados!",
-                    "No volvía a casa, solo contemplaba asombrado mis ruinas.",
-                    "¿Ruinas? ¡Bah! Se erguían sobre un firme fundamento,",
-                    "donde podía volver a construir algo nuevo.",
-                    "Mi marchita morada hecha polvo quedó.",
-                    "Preferí mil veces mis vestigios",
-                    "pues eran esencia mía.",
-                    "No era refugio,",
-                    "sino mi",
-                    "inmensidad."
-                ]
-            };
-            db.activePoemId = id;
-            saveToLocalStorage();
-        }
+    function changeProfile(pName) { db.activeProfile = pName; db.activePoemId = null; saveToLocalStorage(); loadActiveProfile(); }
+    function loadPoem(id) { db.activePoemId = id; saveToLocalStorage(); loadPoemData(); }
 
-        function loadPoemData() {
-            const profile = db.profiles[db.activeProfile];
-            const poem = profile.poems[db.activePoemId];
-            if (!poem) return;
+    function addNewProfile() {
+        const name = prompt("Escriba el nombre del nuevo Perfil de Autor:"); if (!name || name.trim() === "") return;
+        if (db.profiles[name.trim()]) { alert("Perfil ya existe."); return; }
+        db.profiles[name.trim()] = { autorDefault: name.trim(), poems: {} }; db.activeProfile = name.trim(); db.activePoemId = null; saveToLocalStorage(); loadActiveProfile();
+    }
 
-            document.getElementById('titulo').value = poem.titulo || '';
-            document.getElementById('subtitulo').value = poem.subtitulo || '';
-            document.getElementById('autor').value = poem.autor || '';
-            document.getElementById('fecha').value = poem.fecha || '';
-            document.getElementById('numero_poema').value = poem.numero || '';
+    function createNewPoem() {
+        const profile = db.profiles[db.activeProfile]; const id = 'poem_' + Date.now();
+        const hoy = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, ' / ');
+        const num = String(Object.keys(profile.poems).length + 1).padStart(3, '0');
+        // SE CREAN EXACTAMENTE 19 FILAS EN BLANCO EN LA BD
+        profile.poems[id] = { id, titulo: "", subtitulo: "", autor: profile.autorDefault || "", fecha: hoy, numero: num, versos: Array(19).fill("") };
+        db.activePoemId = id; saveToLocalStorage(); updatePoemDropdown(); loadPoemData();
+    }
 
-            const inputs = document.querySelectorAll('.verse-input');
-            inputs.forEach((input, idx) => {
-                input.innerText = poem.versos[idx] || '';
+    function loadPoemData() {
+        const poem = db.profiles[db.activeProfile].poems[db.activePoemId]; if (!poem) return;
+        document.getElementById('titulo').value = poem.titulo || ''; document.getElementById('subtitulo').value = poem.subtitulo || '';
+        document.getElementById('autor').value = poem.autor || ''; document.getElementById('fecha').value = poem.fecha || '';
+        document.getElementById('numero_poema').value = poem.numero || '';
+        document.querySelectorAll('.verse-input').forEach((input, idx) => { input.innerText = poem.versos[idx] || ''; updateWordCount(input); });
+    }
+
+    function saveCurrentState() {
+        const poem = db.profiles[db.activeProfile].poems[db.activePoemId]; if (!poem) return;
+        poem.titulo = document.getElementById('titulo').value; poem.subtitulo = document.getElementById('subtitulo').value;
+        poem.autor = document.getElementById('autor').value; poem.fecha = document.getElementById('fecha').value;
+        poem.numero = document.getElementById('numero_poema').value;
+        poem.versos = Array.from(document.querySelectorAll('.verse-input')).map(i => i.innerText);
+        saveToLocalStorage();
+        const opt = document.getElementById('poem-select').querySelector(`option[value="${db.activePoemId}"]`);
+        if (opt) opt.textContent = `#${poem.numero || '000'} - ${poem.titulo || 'Sin título'}`;
+    }
+
+    function deleteCurrentPoem() {
+        if (Object.keys(db.profiles[db.activeProfile].poems).length <= 1) { alert("Debe conservar al menos un poema."); return; }
+        if (confirm("¿Borrar este poema?")) { delete db.profiles[db.activeProfile].poems[db.activePoemId]; db.activePoemId = Object.keys(db.profiles[db.activeProfile].poems)[0]; saveToLocalStorage(); updatePoemDropdown(); loadPoemData(); }
+    }
+
+    function buildColorSwatches() {
+        const container = document.getElementById('palette-grid-swatches'); container.innerHTML = '';
+        customPaletteSwatches.forEach(hex => { const swatch = document.createElement('div'); swatch.className = 'palette-swatch'; swatch.style.backgroundColor = hex; swatch.onclick = () => selectSwatchColor(hex); container.appendChild(swatch); });
+    }
+
+    function setTheme(themeName) {
+        db.theme = themeName; const toggleBtn = document.getElementById('toggle-picker-btn'); const customBox = document.getElementById('custom-palette-container');
+        if (themeName === 'personalizado') { toggleBtn.style.display = 'inline-block'; applyColorSet(db.customColors); }
+        else { toggleBtn.style.display = 'none'; customBox.style.display = 'none'; applyColorSet(themes[themeName]); }
+        saveToLocalStorage();
+    }
+
+    function toggleAdvancedColorPicker() { const box = document.getElementById('custom-palette-container'); if (box.style.display === 'none' || box.style.display === '') { box.style.display = 'block'; selectColorTarget(activeColorTarget); } else box.style.display = 'none'; }
+    function selectColorTarget(target) { activeColorTarget = target; document.querySelectorAll('.target-btn').forEach(b => b.classList.remove('active-target')); document.getElementById(`target-${target}`).classList.add('active-target'); const c = db.customColors[target]; setSlidersFromHsla(c.h, c.s, c.l, c.a); updatePreviews(); }
+    
+    function updateFromSliders() {
+        const h = parseInt(document.getElementById('slide-h').value), s = parseInt(document.getElementById('slide-s').value), l = parseInt(document.getElementById('slide-l').value), a = parseFloat((document.getElementById('slide-a').value / 100).toFixed(2));
+        document.getElementById('val-h').innerText = h + '°'; document.getElementById('val-s').innerText = s + '%'; document.getElementById('val-l').innerText = l + '%'; document.getElementById('val-a').innerText = Math.round(a * 100) + '%';
+        db.customColors[activeColorTarget] = { h, s, l, a }; updatePreviews(); applyColorSet(db.customColors); saveToLocalStorage();
+    }
+
+    function selectSwatchColor(hex) { const hsla = hexToHsla(hex); setSlidersFromHsla(hsla.h, hsla.s, hsla.l, hsla.a); db.customColors[activeColorTarget] = hsla; updatePreviews(); applyColorSet(db.customColors); saveToLocalStorage(); }
+    function setSlidersFromHsla(h, s, l, a) { document.getElementById('slide-h').value = h; document.getElementById('slide-s').value = s; document.getElementById('slide-l').value = l; document.getElementById('slide-a').value = Math.round(a * 100); document.getElementById('val-h').innerText = h + '°'; document.getElementById('val-s').innerText = s + '%'; document.getElementById('val-l').innerText = l + '%'; document.getElementById('val-a').innerText = Math.round(a * 100) + '%'; }
+    function updatePreviews() { ['bg', 'border', 'header', 'heartRow', 'text'].forEach(t => { document.getElementById(`swatch-preview-${t}`).style.backgroundColor = hslaToString(db.customColors[t] || {h:0,s:0,l:0,a:1}); }); }
+    function hslaToString(obj) { return `hsla(${obj.h}, ${obj.s}%, ${obj.l}%, ${obj.a})`; }
+    
+    function hexToHsla(hex) {
+        let r=0, g=0, b=0; if(hex.length === 4) hex = "#" + hex[1]+hex[1] + hex[2]+hex[2] + hex[3]+hex[3]; const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        if(match) { r = parseInt(match[1], 16)/255; g = parseInt(match[2], 16)/255; b = parseInt(match[3], 16)/255; }
+        const max = Math.max(r,g,b), min = Math.min(r,g,b); let h, s, l = (max+min)/2;
+        if(max===min) { h=s=0; } else { const d = max-min; s = l > 0.5 ? d/(2-max-min) : d/(max+min); switch(max){ case r: h = (g-b)/d + (g<b?6:0); break; case g: h = (b-r)/d + 2; break; case b: h = (r-g)/d + 4; break; } h/=6; }
+        return { h: Math.round(h*360), s: Math.round(s*100), l: Math.round(l*100), a: 1.0 };
+    }
+
+    function applyColorSet(set) {
+        document.documentElement.style.setProperty('--bg-yellow', hslaToString(set.bg)); document.documentElement.style.setProperty('--border-color', hslaToString(set.border));
+        document.documentElement.style.setProperty('--table-header-color', hslaToString(set.header)); document.documentElement.style.setProperty('--heart-row-color', hslaToString(set.heartRow || {h:240,s:30,l:80,a:0.8}));
+        document.documentElement.style.setProperty('--text-color', hslaToString(set.text)); document.documentElement.style.setProperty('--input-text-color', hslaToString(set.text));
+        document.body.style.backgroundColor = (db.theme === 'nocturno') ? '#121212' : '#f7f7f7';
+    }
+
+    function toggleExportMenu() { const el = document.getElementById('export-container'); el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'flex' : 'none'; }
+
+    // ====== FORMATO EXACTO BOTONES ======
+    function getClipboardText() {
+        const titulo = document.getElementById('titulo').value.trim(); const subtitulo = document.getElementById('subtitulo').value.trim();
+        const autor = document.getElementById('autor').value.trim(); const fecha = document.getElementById('fecha').value.trim();
+        const numero = document.getElementById('numero_poema').value.trim();
+        let txt = '';
+        if (titulo) txt += `${titulo.toUpperCase()}\n`;
+        if (subtitulo) txt += `${subtitulo}\n`;
+        if (autor) txt += `${autor}\n`;
+        if (fecha) txt += `${fecha}\n`;
+        if (numero) txt += `#${numero}\n`;
+        txt += `\n`;
+        document.querySelectorAll('.verse-row').forEach(row => {
+            const v = row.querySelector('.verse-input').innerText.trim(); const p = row.querySelector('.col-words').innerText.trim();
+            if (v !== "") txt += `${v} (${p})\n`;
+        });
+        return txt.trim();
+    }
+
+    function getExportText() {
+        const titulo = document.getElementById('titulo').value.trim() || 'Sin título'; const subtitulo = document.getElementById('subtitulo').value.trim();
+        const autor = document.getElementById('autor').value.trim() || 'Anónimo'; const fecha = document.getElementById('fecha').value.trim();
+        const numero = document.getElementById('numero_poema').value.trim() || '000';
+        let txt = `Título: ${titulo.toUpperCase()}\n`;
+        if (subtitulo) txt += `Subtítulo: ${subtitulo}\n`;
+        txt += `Autor: ${autor}\n`;
+        if (fecha) txt += `Fecha: ${fecha}\n`;
+        txt += `Poema: #${numero}\n====================================\n\n`;
+        document.querySelectorAll('.verse-row').forEach(row => {
+            const v = row.querySelector('.verse-input').innerText.trim(); const p = row.querySelector('.col-words').innerText.trim();
+            if (v !== "") txt += `${v} (${p})\n`;
+        });
+        return txt.trim();
+    }
+
+    function downloadFile(content, fileName, mimeType) {
+        const a = document.createElement('a'); const blob = new Blob(['\uFEFF', content], { type: mimeType });
+        const url = URL.createObjectURL(blob); a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 0);
+    }
+
+    function copyVersesAndMetrics() {
+        navigator.clipboard.writeText(getClipboardText()).then(() => alert("Copiado al portapapeles con el formato exacto.")).catch(() => alert("Error al copiar."));
+    }
+
+    function exportTXT() { downloadFile(getExportText(), `${document.getElementById('titulo').value||'Poema'}.txt`, 'text/plain;charset=utf-8'); }
+
+    function exportDOCX() {
+        const titulo = document.getElementById('titulo').value || 'Poema';
+        let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${titulo}</title></head><body>`;
+        html += `<p><b>Título:</b> ${titulo.toUpperCase()}</p>`; const sub = document.getElementById('subtitulo').value; if(sub) html += `<p><b>Subtítulo:</b> ${sub}</p>`;
+        html += `<p><b>Autor:</b> ${document.getElementById('autor').value}</p><p><b>Fecha:</b> ${document.getElementById('fecha').value}</p><p><b>Poema:</b> #${document.getElementById('numero_poema').value}</p><hr/>`;
+        document.querySelectorAll('.verse-row').forEach(row => {
+            const v = row.querySelector('.verse-input').innerText.trim(), p = row.querySelector('.col-words').innerText.trim();
+            if(v !== "") html += `<p style="margin: 0 0 5px 0;">${v} (${p})</p>`;
+        });
+        html += `</body></html>`; downloadFile(html, `${titulo}.doc`, 'application/msword');
+    }
+
+    function exportXLS() {
+        const titulo = document.getElementById('titulo').value || 'Poema';
+        let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"></head><body><table border="1">`;
+        html += `<tr><td style="font-weight:bold;">Título:</td><td>${titulo.toUpperCase()}</td></tr>`;
+        const sub = document.getElementById('subtitulo').value; if (sub) html += `<tr><td style="font-weight:bold;">Subtítulo:</td><td>${sub}</td></tr>`;
+        html += `<tr><td style="font-weight:bold;">Autor:</td><td>${document.getElementById('autor').value}</td></tr>`;
+        html += `<tr><td style="font-weight:bold;">Fecha:</td><td>${document.getElementById('fecha').value}</td></tr>`;
+        html += `<tr><td style="font-weight:bold;">Poema:</td><td>#${document.getElementById('numero_poema').value}</td></tr>`;
+        html += `<tr><td></td><td></td></tr><tr><td style="font-weight:bold; background-color:#e2e8f0;">Verso</td><td style="font-weight:bold; background-color:#e2e8f0;">Métrica</td></tr>`;
+        document.querySelectorAll('.verse-row').forEach(row => {
+            const v = row.querySelector('.verse-input').innerText.trim(), p = row.querySelector('.col-words').innerText.trim();
+            if(v !== "") html += `<tr><td>${v}</td><td style="text-align:center;">${p}</td></tr>`;
+        });
+        html += `</table></body></html>`; downloadFile(html, `${titulo}.xls`, 'application/vnd.ms-excel');
+    }
+
+    function importTXT(event) {
+        const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+        reader.onload = function(e) {
+            let lines = e.target.result.split(/\r?\n/).map(l => l.trim()).filter(l => l !== "");
+            const sep = lines.findIndex(l => l.includes("=======")); 
+            if(sep !== -1) { lines = lines.slice(sep + 1); } else {
+                const hashIndex = lines.findIndex(l => l.startsWith("#")); if(hashIndex !== -1) lines = lines.slice(hashIndex + 1);
+            }
+            document.querySelectorAll('.verse-input').forEach((input, idx) => {
+                if (idx < lines.length) input.innerText = lines[idx].replace(/\s\(\d+\)$/, ''); else input.innerText = '';
                 updateWordCount(input);
             });
-        }
+            saveCurrentState(); alert("Poema importado.");
+        }; reader.readAsText(file); event.target.value = '';
+    }
 
-        function updateProfileDropdown() {
-            const select = document.getElementById('profile-select');
-            select.innerHTML = '';
-            Object.keys(db.profiles).forEach(pName => {
-                const opt = document.createElement('option');
-                opt.value = pName;
-                opt.textContent = pName;
-                select.appendChild(opt);
-            });
-            select.value = db.activeProfile;
-        }
+    function shareContent() {
+        const text = getClipboardText(); const subject = document.getElementById('titulo').value || 'Poema';
+        openFallbackModal(text, subject);
+    }
 
-        function updatePoemDropdown() {
-            const select = document.getElementById('poem-select');
-            select.innerHTML = '';
-            const profile = db.profiles[db.activeProfile];
-            Object.values(profile.poems).forEach(poem => {
-                const opt = document.createElement('option');
-                opt.value = poem.id;
-                opt.textContent = `#${poem.numero || '000'} - ${poem.titulo || 'Sin título'}`;
-                select.appendChild(opt);
-            });
-            select.value = db.activePoemId;
-        }
+    function openFallbackModal(text, subject) {
+        const encTxt = encodeURIComponent(text), encSub = encodeURIComponent(subject);
+        document.getElementById('shareEmail').href = `mailto:?subject=${encSub}&body=${encTxt}`;
+        document.getElementById('shareTelegram').href = `tg://msg?text=${encTxt}`;
+        document.getElementById('shareWhatsApp').href = `whatsapp://send?text=${encTxt}`;
+        document.getElementById('shareWhatsAppWeb').href = `https://web.whatsapp.com/send?text=${encTxt}`;
+        document.getElementById('shareModal').style.display = 'flex';
+    }
 
-        function changeProfile(pName) {
-            db.activeProfile = pName;
-            db.activePoemId = null;
-            saveToLocalStorage();
-            loadActiveProfile();
-        }
-
-        function addNewProfile() {
-            const name = prompt("Escriba el nombre del nuevo Perfil de Autor:");
-            if (!name || name.trim() === "") return;
-            const cleanName = name.trim();
-
-            if (db.profiles[cleanName]) {
-                alert("Este perfil ya existe.");
-                return;
-            }
-
-            const fullName = prompt(`¿Nombre completo para la firma del poema?:`, cleanName);
-            db.profiles[cleanName] = {
-                autorDefault: fullName || cleanName,
-                poems: {}
-            };
-            db.activeProfile = cleanName;
-            db.activePoemId = null;
-            saveToLocalStorage();
-            loadActiveProfile();
-        }
-
-        function deleteProfile() {
-            const keys = Object.keys(db.profiles);
-            if (keys.length <= 1) {
-                alert("Debe haber por lo menos un perfil guardado.");
-                return;
-            }
-            if (confirm(`¿Borrar perfil "${db.activeProfile}" permanentemente?`)) {
-                delete db.profiles[db.activeProfile];
-                db.activeProfile = Object.keys(db.profiles)[0];
-                db.activePoemId = null;
-                saveToLocalStorage();
-                loadActiveProfile();
-            }
-        }
-
-        function loadPoem(id) {
-            db.activePoemId = id;
-            saveToLocalStorage();
-            loadPoemData();
-        }
-
-        function createNewPoem() {
-            const profile = db.profiles[db.activeProfile];
-            const id = 'poem_' + Date.now();
-            const hoy = obtenerFechaHoy();
-            
-            profile.poems[id] = {
-                id: id,
-                titulo: "NUEVO POEMA",
-                subtitulo: "",
-                autor: profile.autorDefault || "",
-                fecha: hoy,
-                numero: String(Object.keys(profile.poems).length + 1).padStart(3, '0'),
-                versos: Array(19).fill("")
-            };
-            db.activePoemId = id;
-            saveToLocalStorage();
-            updatePoemDropdown();
-            loadPoemData();
-        }
-
-        function deleteCurrentPoem() {
-            const profile = db.profiles[db.activeProfile];
-            const keys = Object.keys(profile.poems);
-            if (keys.length <= 1) {
-                alert("Debe conservar al menos un poema.");
-                return;
-            }
-            if (confirm("¿Seguro que desea borrar este poema?")) {
-                delete profile.poems[db.activePoemId];
-                db.activePoemId = Object.keys(profile.poems)[0];
-                saveToLocalStorage();
-                updatePoemDropdown();
-                loadPoemData();
-            }
-        }
-
-        // --- SISTEMA DEL SELECTOR DE COLORES ---
-
-        function setTheme(themeName) {
-            db.theme = themeName;
-            const toggleBtn = document.getElementById('toggle-picker-btn');
-            const customBox = document.getElementById('custom-palette-container');
-
-            if (themeName === 'personalizado') {
-                toggleBtn.style.display = 'inline-block';
-            } else {
-                toggleBtn.style.display = 'none';
-                customBox.style.display = 'none';
-                applyColorSet(themes[themeName]);
-            }
-            saveToLocalStorage();
-        }
-
-        function toggleAdvancedColorPicker() {
-            const customBox = document.getElementById('custom-palette-container');
-            if (customBox.style.display === 'none' || customBox.style.display === '') {
-                customBox.style.display = 'block';
-                selectColorTarget(activeColorTarget);
-            } else {
-                customBox.style.display = 'none';
-            }
-        }
-
-        function selectColorTarget(target) {
-            activeColorTarget = target;
-            document.querySelectorAll('.target-btn').forEach(btn => btn.classList.remove('active-target'));
-            document.getElementById(`target-${target}`).classList.add('active-target');
-
-            const colorObj = db.customColors[target];
-            setSlidersFromHsla(colorObj.h, colorObj.s, colorObj.l, colorObj.a);
-            updatePreviews();
-            applyColorSet(db.customColors);
-        }
-
-        function updateFromSliders() {
-            const h = parseInt(document.getElementById('slide-h').value);
-            const s = parseInt(document.getElementById('slide-s').value);
-            const l = parseInt(document.getElementById('slide-l').value);
-            const a = parseFloat((document.getElementById('slide-a').value / 100).toFixed(2));
-
-            document.getElementById('val-h').innerText = h + '°';
-            document.getElementById('val-s').innerText = s + '%';
-            document.getElementById('val-l').innerText = l + '%';
-            document.getElementById('val-a').innerText = Math.round(a * 100) + '%';
-
-            db.customColors[activeColorTarget] = { h, s, l, a };
-
-            updatePreviews();
-            applyColorSet(db.customColors);
-            saveToLocalStorage();
-        }
-
-        function selectSwatchColor(hex) {
-            const hsla = hexToHsla(hex);
-            setSlidersFromHsla(hsla.h, hsla.s, hsla.l, hsla.a);
-            db.customColors[activeColorTarget] = hsla;
-            updatePreviews();
-            applyColorSet(db.customColors);
-            saveToLocalStorage();
-        }
-
-        function setSlidersFromHsla(h, s, l, a) {
-            document.getElementById('slide-h').value = h;
-            document.getElementById('slide-s').value = s;
-            document.getElementById('slide-l').value = l;
-            document.getElementById('slide-a').value = Math.round(a * 100);
-
-            document.getElementById('val-h').innerText = h + '°';
-            document.getElementById('val-s').innerText = s + '%';
-            document.getElementById('val-l').innerText = l + '%';
-            document.getElementById('val-a').innerText = Math.round(a * 100) + '%';
-        }
-
-        function updatePreviews() {
-            document.getElementById('swatch-preview-bg').style.backgroundColor = hslaToString(db.customColors.bg);
-            document.getElementById('swatch-preview-border').style.backgroundColor = hslaToString(db.customColors.border);
-            document.getElementById('swatch-preview-header').style.backgroundColor = hslaToString(db.customColors.header);
-            document.getElementById('swatch-preview-heartRow').style.backgroundColor = hslaToString(db.customColors.heartRow);
-            document.getElementById('swatch-preview-text').style.backgroundColor = hslaToString(db.customColors.text);
-        }
-
-        function hslaToString(obj) {
-            if (!obj) return 'hsla(0, 0%, 0%, 1)';
-            return `hsla(${obj.h}, ${obj.s}%, ${obj.l}%, ${obj.a})`;
-        }
-
-        function hexToHsla(hex) {
-            let r, g, b;
-            const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-            const fullHex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
-            if (result) {
-                r = parseInt(result[1], 16) / 255;
-                g = parseInt(result[2], 16) / 255;
-                b = parseInt(result[3], 16) / 255;
-            } else {
-                return { h: 0, s: 0, l: 0, a: 1.0 };
-            }
-
-            const max = Math.max(r, g, b), min = Math.min(r, g, b);
-            let h, s, l = (max + min) / 2;
-
-            if (max === min) {
-                h = s = 0;
-            } else {
-                const d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                switch (max) {
-                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                    case g: h = (b - r) / d + 2; break;
-                    case b: h = (r - g) / d + 4; break;
-                }
-                h /= 6;
-            }
-
-            return {
-                h: Math.round(h * 360),
-                s: Math.round(s * 100),
-                l: Math.round(l * 100),
-                a: 1.0
-            };
-        }
-
-        function hslaToHex(h, s, l) {
-            l /= 100;
-            const a = s * Math.min(l, 1 - l) / 100;
-            const f = n => {
-                const k = (n + h / 30) % 12;
-                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-                return Math.round(255 * color).toString(16).padStart(2, '0');
-            };
-            return `#${f(0)}${f(8)}${f(4)}`;
-        }
-
-        function applyColorSet(set) {
-            document.documentElement.style.setProperty('--bg-yellow', hslaToString(set.bg));
-            document.documentElement.style.setProperty('--border-color', hslaToString(set.border));
-            document.documentElement.style.setProperty('--table-header-color', hslaToString(set.header));
-            document.documentElement.style.setProperty('--heart-row-color', hslaToString(set.heartRow || { h: 240, s: 30, l: 80, a: 0.8 }));
-            document.documentElement.style.setProperty('--text-color', hslaToString(set.text));
-            document.documentElement.style.setProperty('--input-text-color', hslaToString(set.text));
-
-            if (db.theme === 'nocturno') {
-                document.body.style.backgroundColor = '#121212';
-            } else {
-                document.body.style.backgroundColor = '#f7f7f7';
-            }
-        }
-
-        // --- EXPORTACIÓN E IMPORTACIÓN ---
-
-        // Función automatizada para copiar las columnas Verso y Palabra sin usar selección manual incómoda
-        function copyColumnsToClipboard() {
-            let clipText = "";
-            const rows = document.querySelectorAll('.verse-row');
-            rows.forEach(row => {
-                const verso = row.querySelector('.verse-input').innerText.trim();
-                const palabras = row.querySelector('.col-words').innerText.trim();
-                
-                // Formateado con un tabulador "\t", permitiendo que Excel o Calc lo reconozcan como dos columnas distintas
-                clipText += `${verso}\t${palabras}\n`;
-            });
-
-            navigator.clipboard.writeText(clipText).then(() => {
-                alert("Columnas copiadas al portapapeles. Listo para pegar directamente en LibreOffice Calc o Excel.");
-            }).catch(() => {
-                alert("No se pudo copiar automáticamente. Intenta realizar la selección manual.");
-            });
-        }
-
-        // Importación de archivos planos TXT
-        function importTXT(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const text = e.target.result;
-                const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l !== "");
-                const inputs = document.querySelectorAll('.verse-input');
-                
-                inputs.forEach((input, idx) => {
-                    if (idx < lines.length) {
-                        input.innerText = lines[idx];
-                    } else {
-                        input.innerText = '';
-                    }
-                    updateWordCount(input);
-                });
-                saveCurrentState();
-                alert("Poema importado exitosamente desde el archivo plano TXT.");
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-
-        function saveCurrentState() {
-            const profile = db.profiles[db.activeProfile];
-            const poem = profile.poems[db.activePoemId];
-            if (!poem) return;
-
-            poem.titulo = document.getElementById('titulo').value;
-            poem.subtitulo = document.getElementById('subtitulo').value;
-            poem.autor = document.getElementById('autor').value;
-            poem.fecha = document.getElementById('fecha').value;
-            poem.numero = document.getElementById('numero_poema').value;
-
-            const inputs = document.querySelectorAll('.verse-input');
-            poem.versos = Array.from(inputs).map(input => input.innerText);
-            saveToLocalStorage();
-
-            const select = document.getElementById('poem-select');
-            const opt = select.querySelector(`option[value="${db.activePoemId}"]`);
-            if (opt) { opt.textContent = `#${poem.numero || '000'} - ${poem.titulo || 'Sin título'}`; }
-        }
-
-        function saveToLocalStorage() {
-            localStorage.setItem('poemas_v3_stable', JSON.stringify(db));
-        }
-
-        function formatPoemNumber(input) {
-            let val = input.value.trim();
-            if (val !== "" && !isNaN(val)) {
-                input.value = String(val).padStart(3, '0');
-                saveCurrentState();
-            }
-        }
-
-        function updateWordCount(input) {
-            const text = input.innerText.trim();
-            const words = text ? text.split(/\s+/) : [];
-            input.closest('tr').querySelector('.col-words').innerText = words.length;
-        }
-
-        function obtenerFechaHoy() {
-            const opciones = { day: '2-digit', month: '2-digit', year: 'numeric' };
-            const hoy = new Date();
-            return hoy.toLocaleDateString('es-ES', opciones).replace(/\//g, ' / ');
-        }
-
-        function getConsolidatedText() {
-            const titulo = document.getElementById('titulo').value || 'Sin título';
-            const subtitulo = document.getElementById('subtitulo').value || '';
-            const autor = document.getElementById('autor').value || 'Anónimo';
-            const fecha = document.getElementById('fecha').value || '';
-            const numero = document.getElementById('numero_poema').value || '000';
-
-            let txt = `${titulo.toUpperCase()}\n`;
-            if (subtitulo) txt += `${subtitulo}\n`;
-            txt += `Autor: ${autor}\nFecha: ${fecha}\nPoema: #${numero}\n`;
-            txt += `====================================\n\n`;
-
-            const inputs = document.querySelectorAll('.verse-input');
-            inputs.forEach((input, idx) => {
-                const val = input.innerText.trim();
-                if (val !== "") txt += `${idx + 1}. ${val}\n`;
-            });
-            return txt;
-        }
-
-        function exportTXT() {
-            downloadFile(getConsolidatedText(), 'poema.txt', 'text/plain;charset=utf-8');
-        }
-
-        function exportXLS() {
-            const colorSet = db.theme === 'personalizado' ? db.customColors : themes[db.theme];
-            const bgHex = hslaToHex(colorSet.bg.h, colorSet.bg.s, colorSet.bg.l);
-            const headerHex = hslaToHex(colorSet.header.h, colorSet.header.s, colorSet.header.l);
-
-            const titulo = document.getElementById('titulo').value || 'Poema';
-            let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">`;
-            html += `<head><meta charset="utf-8"></head><body><table border="1" style="background-color: ${bgHex};">`;
-            html += `<tr><td style="font-weight:bold; background-color:${headerHex};">Título</td><td colspan="2">${titulo}</td></tr>`;
-            html += `<tr><td style="font-weight:bold; background-color:${headerHex};">Subtítulo</td><td colspan="2">${document.getElementById('subtitulo').value}</td></tr>`;
-            html += `<tr><td style="font-weight:bold; background-color:${headerHex};">Autor</td><td colspan="2">${document.getElementById('autor').value}</td></tr>`;
-            html += `<tr><td style="font-weight:bold; background-color:${headerHex};">Fecha</td><td colspan="2">${document.getElementById('fecha').value}</td></tr>`;
-            html += `<tr><td style="font-weight:bold; background-color:${headerHex};">#</td><td colspan="2">${document.getElementById('numero_poema').value}</td></tr>`;
-            html += `<tr style="font-weight:bold; background-color:${headerHex};"><td>N.º</td><td>Verso</td><td>Palabras</td></tr>`;
-
-            const rows = document.querySelectorAll('.verse-row');
-            rows.forEach(row => {
-                const num = row.querySelector('.col-num').innerText;
-                const verso = row.querySelector('.verse-input').innerText;
-                const palabras = row.querySelector('.col-words').innerText;
-                html += `<tr><td>${num}</td><td>${verso}</td><td>${palabras}</td></tr>`;
-            });
-            html += `</table></body></html>`;
-            downloadFile(html, 'poema.xls', 'application/vnd.ms-excel');
-        }
-
-        function exportDOCX() {
-            const titulo = document.getElementById('titulo').value || 'Poema';
-            let html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>`;
-            html += `<h1 style="text-align:center;">${titulo}</h1>`;
-            html += `<p><b>Autor:</b> ${document.getElementById('autor').value}</p>`;
-            html += `<p><b>Fecha:</b> ${document.getElementById('fecha').value}</p><hr/>`;
-            const inputs = document.querySelectorAll('.verse-input');
-            inputs.forEach(input => {
-                const verso = input.innerText.trim();
-                if (verso !== "") html += `<p>${verso}</p>`;
-            });
-            html += `</body></html>`;
-            downloadFile(html, 'poema.doc', 'application/msword');
-        }
-
-        function exportPDF() { window.print(); }
-
-        function shareContent() {
-            const text = getConsolidatedText();
-            const subject = document.getElementById('titulo').value || 'Poema';
-            if (navigator.share) {
-                navigator.share({ title: subject, text: text }).catch(() => openFallbackModal(text, subject));
-            } else {
-                openFallbackModal(text, subject);
-            }
-        }
-
-        function openFallbackModal(text, subject) {
-            const encodedText = encodeURIComponent(text);
-            const encodedSubject = encodeURIComponent(subject);
-            document.getElementById('shareEmail').href = `mailto:?subject=${encodedSubject}&body=${encodedText}`;
-            document.getElementById('shareTelegram').href = `tg://msg?text=${encodedText}`;
-            document.getElementById('shareWhatsApp').href = `https://api.whatsapp.com/send?text=${encodedText}`;
-            document.getElementById('shareModal').style.display = 'flex';
-        }
-
-        function closeModal(event) { document.getElementById('shareModal').style.display = 'none'; }
-
-        function exportBackup() {
-            downloadFile(JSON.stringify(db, null, 2), `respaldo_general_poemas.json`, 'application/json');
-        }
-
-        function importBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (imported && imported.profiles) {
-                        if (confirm("Se sobrescribirá la base de datos con esta copia. ¿Proceder?")) {
-                            db = imported;
-                            saveToLocalStorage();
-                            loadActiveProfile();
-                            alert("Copia restaurada.");
-                        }
-                    } else { alert("Archivo no válido."); }
-                } catch (err) { alert("Error al leer el archivo."); }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-    </script>
+    function closeModal() { document.getElementById('shareModal').style.display = 'none'; }
+    function exportBackup() { downloadFile(JSON.stringify(db, null, 2), `respaldo_poemas.json`, 'application/json'); }
+    function importBackup(e) {
+        const file = e.target.files[0]; if(!file) return; const r = new FileReader();
+        r.onload = function(ev) {
+            try {
+                const imp = JSON.parse(ev.target.result);
+                if (imp && imp.profiles) { if (confirm("Se sobrescribirá la base de datos. ¿Continuar?")) { db = imp; saveToLocalStorage(); loadActiveProfile(); alert("Copia restaurada."); } }
+                else alert("Archivo no válido.");
+            } catch (err) { alert("Error al leer archivo."); }
+        }; r.readAsText(file); e.target.value = '';
+    }
+</script>
 </body>
 </html>
