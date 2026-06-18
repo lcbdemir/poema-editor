@@ -149,15 +149,131 @@
         
         .char-btn:hover{ background-color:#edf2f7; }
         
+        /* PANEL DE COLOR COMPLETO */
         .custom-palette-box{
             display: none;
             background-color:#ffffff;
             border-bottom: 2px solid var(--border-color);
-            padding: 12px;
+            padding: 15px;
             color:#000000;
         }
         
-        /* Barra de herramientas COLAPSABLE */
+        .palette-layout{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        
+        .target-selector{
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 130px;
+        }
+        
+        .target-btn{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color:#f7fafc;
+            border: 2px solid#cbd5e0;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            color:#2d3748;
+            transition: all 0.15s;
+        }
+        
+        .target-btn.active-target{
+            border-color:#3182ce;
+            background-color:#ebf8ff;
+            color:#2b6cb0;
+        }
+        
+        .swatch-preview{
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid#718096;
+        }
+        
+        .palette-grid-container{
+            flex-grow: 1;
+            max-width: 320px;
+        }
+        
+        .grid-title{
+            font-size: 12px;
+            font-weight: bold;
+            color:#4a5568;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .palette-grid{
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        
+        .palette-swatch{
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid#cbd5e0;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .palette-swatch:hover{
+            transform: scale(1.2);
+        }
+        
+        /* CONTROLES HSLA */
+        .rva-panel{
+            background-color:#f7fafc;
+            border: 1px solid#cbd5e0;
+            border-radius: 6px;
+            padding: 12px;
+            min-width: 270px;
+            flex-grow: 1;
+        }
+        
+        .rva-row{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .rva-row:last-child{
+            margin-bottom: 0;
+        }
+        
+        .rva-label{
+            font-weight: bold;
+            font-size: 13px;
+            width: 85px;
+            color:#4a5568;
+        }
+        
+        .rva-slider{
+            flex-grow: 1;
+            cursor: pointer;
+        }
+        
+        .rva-value-display{
+            width: 45px;
+            text-align: right;
+            font-size: 12px;
+            font-weight: bold;
+            color:#2d3748;
+        }
+        
+        /* BARRA DE HERRAMIENTAS COLAPSABLE */
         .toolbar-container{
             background-color: rgba(0, 0, 0, 0.05);
             border-bottom: 2px solid var(--border-color);
@@ -236,7 +352,6 @@
             text-transform: uppercase;
         }
         
-        /* Columnas optimizadas */
         .col-num{
             width: 35px;
             text-align: center;
@@ -334,7 +449,6 @@
             .container{ box-shadow: none; border: 1px solid black; }
         }
         
-        /* Optimización móvil */
         @media (max-width: 600px){
             body{ padding: 5px; }
             .container{ padding: 0; }
@@ -370,6 +484,13 @@
             }
             .top-management{ padding: 8px 10px; }
             .panel-row{ gap: 8px; }
+            .palette-layout{
+                flex-direction: column;
+            }
+            .rva-panel{
+                min-width: auto;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -417,21 +538,67 @@
                     <option value="sepia">Sepia 📜</option>
                     <option value="personalizado">Personalizado 🎨</option>
                 </select>
-                <button id="toggle-picker-btn" class="btn btn-blue" style="display: none;" onclick="toggleAdvancedColorPicker()">🎨</button>
+                <button id="toggle-picker-btn" class="btn btn-blue" style="display: none;" onclick="toggleAdvancedColorPicker()">🎨 Editar Color</button>
             </div>
         </div>
         
+        <!-- PANEL DE COLOR COMPLETO RESTAURADO -->
         <div class="custom-palette-box" id="custom-palette-container">
-            <div style="display: flex; flex-wrap: wrap; gap: 15px;">
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <span style="font-size: 11px; font-weight: bold;">Elemento:</span>
-                    <button class="btn" style="background:#f0f0c0; color:black;" onclick="selectColorTarget('bg')">Fondo</button>
-                    <button class="btn" style="background:#e8e8a0; color:black;" onclick="selectColorTarget('header')">Cabecera</button>
-                    <button class="btn" style="background:#d4f1f9; color:black;" onclick="selectColorTarget('heartRow')">Fila 10</button>
+            <div class="palette-layout">
+                <!-- 1. Elemento a Pintar -->
+                <div class="target-selector">
+                    <span class="grid-title">Elemento:</span>
+                    <button id="target-bg" class="target-btn active-target" onclick="selectColorTarget('bg')">
+                        <span class="swatch-preview" id="swatch-preview-bg"></span>
+                        Fondo
+                    </button>
+                    <button id="target-border" class="target-btn" onclick="selectColorTarget('border')">
+                        <span class="swatch-preview" id="swatch-preview-border"></span>
+                        Bordes
+                    </button>
+                    <button id="target-header" class="target-btn" onclick="selectColorTarget('header')">
+                        <span class="swatch-preview" id="swatch-preview-header"></span>
+                        Cabeceras
+                    </button>
+                    <button id="target-heartRow" class="target-btn" onclick="selectColorTarget('heartRow')">
+                        <span class="swatch-preview" id="swatch-preview-heartRow"></span>
+                        Fila 10
+                    </button>
+                    <button id="target-text" class="target-btn" onclick="selectColorTarget('text')">
+                        <span class="swatch-preview" id="swatch-preview-text"></span>
+                        Texto
+                    </button>
                 </div>
-                <div style="flex-grow: 1;">
-                    <span style="font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px;">Colores rápidos:</span>
-                    <div id="palette-grid-swatches" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px;"></div>
+                
+                <!-- 2. Gemas Rápidas -->
+                <div class="palette-grid-container">
+                    <div class="grid-title">Gemas rápidas:</div>
+                    <div class="palette-grid" id="palette-grid-swatches"></div>
+                </div>
+                
+                <!-- 3. Controles HSLA -->
+                <div class="rva-panel">
+                    <div class="grid-title">Control de Tono, Brillo y Opacidad:</div>
+                    <div class="rva-row">
+                        <span class="rva-label">Color (Tono):</span>
+                        <input type="range" id="slide-h" class="rva-slider" min="0" max="360" oninput="updateFromSliders()">
+                        <span id="val-h" class="rva-value-display">0°</span>
+                    </div>
+                    <div class="rva-row">
+                        <span class="rva-label">Saturación:</span>
+                        <input type="range" id="slide-s" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
+                        <span id="val-s" class="rva-value-display">100%</span>
+                    </div>
+                    <div class="rva-row">
+                        <span class="rva-label" style="font-weight: bold;">💡 Brillo:</span>
+                        <input type="range" id="slide-l" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
+                        <span id="val-l" class="rva-value-display">50%</span>
+                    </div>
+                    <div class="rva-row">
+                        <span class="rva-label" style="font-weight: bold;">🏁 Opacidad:</span>
+                        <input type="range" id="slide-a" class="rva-slider" min="0" max="100" oninput="updateFromSliders()">
+                        <span id="val-a" class="rva-value-display">100%</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -870,6 +1037,8 @@ function toggleAdvancedColorPicker(){
 
 function selectColorTarget(target){
     activeColorTarget= target;
+    document.querySelectorAll('.target-btn').forEach(btn=> btn.classList.remove('active-target'));
+    document.getElementById(`target-${target}`).classList.add('active-target');
     const colorObj= db.customColors[target];
     setSlidersFromHsla(colorObj.h, colorObj.s, colorObj.l, colorObj.a);
     updatePreviews();
@@ -877,11 +1046,23 @@ function selectColorTarget(target){
 }
 
 function updateFromSliders(){
-    // Simplificado para este ejemplo
+    const h= parseInt(document.getElementById('slide-h').value);
+    const s= parseInt(document.getElementById('slide-s').value);
+    const l= parseInt(document.getElementById('slide-l').value);
+    const a= parseFloat((document.getElementById('slide-a').value/ 100).toFixed(2));
+    document.getElementById('val-h').innerText= h+'°';
+    document.getElementById('val-s').innerText= s+'%';
+    document.getElementById('val-l').innerText= l+'%';
+    document.getElementById('val-a').innerText= Math.round(a* 100)+'%';
+    db.customColors[activeColorTarget]={ h, s, l, a};
+    updatePreviews();
+    applyColorSet(db.customColors);
+    saveToLocalStorage();
 }
 
 function selectSwatchColor(hex){
     const hsla= hexToHsla(hex);
+    setSlidersFromHsla(hsla.h, hsla.s, hsla.l, hsla.a);
     db.customColors[activeColorTarget]= hsla;
     updatePreviews();
     applyColorSet(db.customColors);
@@ -889,11 +1070,22 @@ function selectSwatchColor(hex){
 }
 
 function setSlidersFromHsla(h, s, l, a){
-    // Simplificado
+    document.getElementById('slide-h').value= h;
+    document.getElementById('slide-s').value= s;
+    document.getElementById('slide-l').value= l;
+    document.getElementById('slide-a').value= Math.round(a* 100);
+    document.getElementById('val-h').innerText= h+'°';
+    document.getElementById('val-s').innerText= s+'%';
+    document.getElementById('val-l').innerText= l+'%';
+    document.getElementById('val-a').innerText= Math.round(a* 100)+'%';
 }
 
 function updatePreviews(){
-    // Simplificado
+    document.getElementById('swatch-preview-bg').style.backgroundColor= hslaToString(db.customColors.bg);
+    document.getElementById('swatch-preview-border').style.backgroundColor= hslaToString(db.customColors.border);
+    document.getElementById('swatch-preview-header').style.backgroundColor= hslaToString(db.customColors.header);
+    document.getElementById('swatch-preview-heartRow').style.backgroundColor= hslaToString(db.customColors.heartRow);
+    document.getElementById('swatch-preview-text').style.backgroundColor= hslaToString(db.customColors.text);
 }
 
 function hexToHsla(hex){
@@ -925,15 +1117,9 @@ function hexToHsla(hex){
     return{ h: Math.round(h* 360), s: Math.round(s* 100), l: Math.round(l* 100), a: 1.0 };
 }
 
-function hslaToHex(h, s, l){
-    l/= 100;
-    const a= s* Math.min(l, 1- l)/ 100;
-    const f= n=>{
-        const k=(n+ h/ 30)% 12;
-        const color= l- a* Math.max(Math.min(k- 3, 9- k, 1),-1);
-        return Math.round(255* color).toString(16).padStart(2,'0');
-    };
-    return `#${f(0)}${f(8)}${f(4)}`;
+function hslaToString(obj){
+    if(!obj) return'hsla(0, 0%, 0%, 1)';
+    return `hsla(${obj.h},${obj.s}%,${obj.l}%,${obj.a})`;
 }
 
 function applyColorSet(set){
@@ -945,12 +1131,6 @@ function applyColorSet(set){
     document.documentElement.style.setProperty('--input-text-color', hslaToString(set.text));
 }
 
-function hslaToString(obj){
-    if(!obj) return'hsla(0, 0%, 0%, 1)';
-    return `hsla(${obj.h},${obj.s}%,${obj.l}%,${obj.a})`;
-}
-
-// NUEVA FUNCIÓN: Copiar versos con métrica entre paréntesis (SIN números de línea)
 function copyVersesWithMetrics(){
     const titulo= document.getElementById('titulo').value || 'Sin título';
     const subtitulo= document.getElementById('subtitulo').value || '';
@@ -988,7 +1168,6 @@ function importTXT(event){
         const inputs= document.querySelectorAll('.verse-input');
         inputs.forEach((input, idx)=>{
             if(idx< lines.length){
-                // Remover métrica entre paréntesis si existe
                 let line= lines[idx].replace(/\s*\(\d+\)\s*$/, '');
                 input.innerText= line;
             } else{
@@ -1188,7 +1367,6 @@ function downloadFile(content, filename, type){
     URL.revokeObjectURL(url);
 }
 
-// FUNCIONES DE COLAPSAR/MOSTRAR
 function toggleToolbar(){
     const toolbar= document.getElementById('toolbar');
     const arrow= document.getElementById('toolbar-arrow');
